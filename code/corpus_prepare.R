@@ -104,7 +104,7 @@ corpus <- TermDocumentMatrix(d.corpus, control = list(stopwords = stopwordsCN())
 
 
 #Deng ####
-#分卷
+##分卷####
 deng <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/邓小平文选.txt", encoding = "UTF-8")
 
 volumn <- grep("^第.卷", deng) #这里需要行的定位，不需要token
@@ -123,11 +123,11 @@ for(i in 1:length(volumn)){
   }
 }
 
-#clean
+#3clean####
 d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/deng/"), list(language = NA))
 
 ## 清除標點符號, 數字
-d.corpus <- tm_map(d.corpus, function(word){paste0(word, collapse = " ")})
+
 
 d.corpus <- tm_map(d.corpus, removePunctuation)
 d.corpus <- tm_map(d.corpus, removeNumbers)
@@ -136,16 +136,30 @@ d.corpus <- tm_map(d.corpus, removeNumbers)
 
 d.corpus <- tm_map(d.corpus, function(word) {
   gsub("[A-Za-z0-9]", "", word)
-  #gsub("[\\r\\n]", "", word)
-  #gsub("\\r\\n", "", word)
-  #gsub("\\n", "", word)
-  #paste0(word, collapse = " ")
+  #paste0(word, collapse = " ") #此步不可用，会导致后面无法正常去除停止词
 })
 
-d.corpus <- tm_map(d.corpus,segmentCN, returnType = "tm")
-d.corpus <- tm_map(d.corpus,unlist)
+d.corpus <- tm_map(d.corpus,segmentCN, nature = T) #works well at this step
+
+#d.corpus -> d.corpus.back
+#是一下这步导致的\n问题
+
+d.corpus <- tm_map(d.corpus, function(sentence) {
+  noun <- lapply(sentence, function(w) {
+    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
+  })
+  unlist(noun)
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
+})
+
 
 d.corpus <- Corpus(VectorSource(d.corpus))
 
-corpus <- DocumentTermMatrix(d.corpus, 
-                             control = list(stopwords = stopwordsCN()))
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = stopwordsCN(), wordLengths = c(2, Inf)))
+
+inspect(corpus[1:2, 1:10]) # detect result
+
+
+
