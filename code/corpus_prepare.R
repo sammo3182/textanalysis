@@ -54,7 +54,7 @@ d.corpus<- tm_map(d.corpus, function(sentence) {
   unlist(noun)
 })
 
-d.corpus <- tm_map(d.corpus, segmentCN, returnType = 'tm')
+
 
 d.corpus <- Corpus(VectorSource(d.corpus))
 
@@ -71,36 +71,28 @@ corpus.bi <-readCorpus(corpus, type = "dtm")
 
 ####################Selections###########################
 
-#Mao####
-mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集.txt", encoding = "UTF-8")
+#Mao ####
+#Clean####
+mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集.txt") #不用UTF-8, 否则不可以正确认读。
 
 mao <- gsub("注\\s+释", "", mao)
 mao <- gsub("\\s+〔\\d{1,2}〕.*", "", mao)
 mao <- gsub("-+", "", mao)
 mao <- gsub("\\s+", "", mao)
 mao <- gsub("[A-Za-z0-9]", "", mao)
-mao <- mao[sapply(mao, nchar) > 0] 
-mao <- paste0(mao, collapse = "")
+#mao <- paste0(mao, collapse = "")
 mao <- removePunctuation(mao)
 mao <- removeNumbers(mao)
-mao <- segmentCN(mao, nature = T)%>% unlist()
-
-d.corpus <- Corpus(VectorSource(mao), list(language = NA))
-
-d.corpus<- tm_map(d.corpus, function(sentence) {
-  noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
-  })
-  unlist(noun)
+mao <- segmentCN(mao, nature = T)
+mao <- lapply(mao, function(w) {
+  w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
 })
+mao <- unlist(mao)
 
-d.corpus <- tm_map(d.corpus, segmentCN, returnType = 'tm')
+myStopWords <- c(stopwordsCN(), "毛泽东", "同志")
+mao <- removeWords(mao, myStopWords)
 
-d.corpus <- Corpus(VectorSource(d.corpus))
-
-#d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
-
-corpus <- TermDocumentMatrix(d.corpus, control = list(stopwords = stopwordsCN()))
+mao <- mao[sapply(mao, nchar) > 1]  #选择两个字以上的词
 
 
 #Deng ####
@@ -123,7 +115,7 @@ for(i in 1:length(volumn)){
   }
 }
 
-#3clean####
+#clean####
 d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/deng/"), list(language = NA))
 
 ## 清除標點符號, 數字
@@ -157,9 +149,50 @@ d.corpus <- tm_map(d.corpus, function(sentence) {
 
 d.corpus <- Corpus(VectorSource(d.corpus))
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = stopwordsCN(), wordLengths = c(2, Inf)))
+myStopWords <- c(stopwordsCN(), "邓小平", "同志" )
+#d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
+
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf)))
 
 inspect(corpus[1:2, 1:10]) # detect result
 
+#Jiang ####
+d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang/"), list(language = NA))
+
+##清除注释
+
+d.corpus <- tm_map(d.corpus, function(note){
+  note <- gsub("注\\s+释", "", note)
+  note <- gsub("〔.\\d{1,3}〕.*", "", note)
+  note <- gsub("\\d{1,3}.*", "", note)
+  note <- gsub("\\s+", "", note)
+  note <- gsub("[A-Za-z0-9]", "", note)
+})
+
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+
+d.corpus <- tm_map(d.corpus,segmentCN, nature = T) #works well at this step
+
+
+d.corpus <- tm_map(d.corpus, function(sentence) {
+  noun <- lapply(sentence, function(w) {
+    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
+  })
+  unlist(noun)
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
+})
+
+
+d.corpus <- Corpus(VectorSource(d.corpus))
+
+myStopWords <- c(stopwordsCN(), "江泽民", "同志" )
+#d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
+
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(6, Inf)))
+
+inspect(corpus[1:3, 1:20]) # detect result
 
 
