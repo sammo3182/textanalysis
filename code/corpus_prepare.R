@@ -208,16 +208,16 @@ d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
 #  note <- gsub("[A-Za-z0-9]", "", note)
 #}))
 
-d.back.vectorcorp <- d.corpus
+d.back.vectorcorp -> d.corpus
 
 
-d.corpus <- tm_map(d.corpus, content_transformer(segmentCN), returnType = "tm") #解决多词一组问题，再次segment
+d.corpus <- tm_map(d.corpus, content_transformer(function(x){paste0(x, collapse = "")})) #为解决segment问题而试图去掉\n,但结果是全都黏在了一起。
 
 corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf)))) #\n问题依旧
 
 #corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
 
-inspect(corpus[1:3, 1:20]) # detect result
+inspect(corpus) # detect result
 
 corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
