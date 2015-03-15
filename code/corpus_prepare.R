@@ -201,7 +201,7 @@ myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
 d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
-看起来没必要做以下几步
+#看起来没必要做以下几步
 #d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation))
 #d.corpus <- tm_map(d.corpus, content_transformer(removeNumbers))
 #d.corpus <- tm_map(d.corpus, content_transformer(function(note){
