@@ -193,11 +193,7 @@ d.corpus <- tm_map(d.corpus, function(note) {
 #backup for the following steps
 d.corpus.back -> d.corpus
 
-d.corpus <- tm_map(d.corpus, function(noun){
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
-}) #在VectorSoruce前用gsub去掉\n，问题依旧
+
 
 d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，非常好的样子，故开始使用content_transfer
 
@@ -205,13 +201,13 @@ myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
 d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
-#看起来没必要做以下几步
-#d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation))
-#d.corpus <- tm_map(d.corpus, content_transformer(removeNumbers))
-#d.corpus <- tm_map(d.corpus, content_transformer(function(note){
-#  note <- gsub("[A-Za-z0-9]", "", note)
-#}))
 
+
+d.corpus <- tm_map(d.corpus, content_transformer(function(noun){
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
+})) #用gsub去掉\n, 问题依旧
 
 d.back.vectorcorp -> d.corpus
 
