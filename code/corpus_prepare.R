@@ -52,8 +52,10 @@ d.corpus<- tm_map(d.corpus, function(sentence) {
     w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
   })
   unlist(noun)
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
 })
-
 
 
 d.corpus <- Corpus(VectorSource(d.corpus))
@@ -61,7 +63,7 @@ d.corpus <- Corpus(VectorSource(d.corpus))
 myStopWords <- c(stopwordsCN(), "专栏", "新华社", "本报", "本报消息", "本报讯", "本市讯", "记者", "报道" )
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
-corpus <- TermDocumentMatrix(d.corpus, control = list(stopwords = myStopWords))
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf)))
 
 
 
@@ -195,4 +197,7 @@ corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, w
 
 inspect(corpus[1:3, 1:20]) # detect result
 
+library(topicmodels)
+topic.ctm <- LDA(corpus, k = 3, method = "Gibbs")
 
+terms(topic.ctm, 3, .1)
