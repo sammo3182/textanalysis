@@ -191,19 +191,12 @@ d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，�
 myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
-d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
-d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation)) #文本中含有listc(\)等，试图通过先期手段去除
-d.corpus <- tm_map(d.corpus, content_transformer(function(note){
-  note <- gsub("[A-Za-z0-9]", "", note)
-}))
-
-
 
 #corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)))) #\n问题依旧
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题不存在了，但是整个文章被合并为一个文档
 
-inspect(corpus[1:2, 1:30]) # detect result
+inspect(corpus[1, 1:30]) # detect result
 
 corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
