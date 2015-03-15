@@ -6,10 +6,10 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("dplyr","ggplot2","tm", "tmcn", "Rwordseg")
+packages <- c("dplyr","ggplot2","tm", "tmcn", "Rwordseg", "topicmodels")
 ipak(packages)
 
-
+#Sys.setlocale(locale = "chinese")
 
 #####################RMRB################################
 ##Meta data ####
@@ -159,45 +159,72 @@ corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, w
 inspect(corpus[1:2, 1:10]) # detect result
 
 #Jiang ####
+#在原文件中找到注释标记“”， 然后替换为空格
 d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang/"), list(language = NA))
 
 ##清除注释
 
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
 d.corpus <- tm_map(d.corpus, function(note){
-  note <- gsub("注\\s+释", "", note)
-  note <- gsub("〔.\\d{1,3}〕.*", "", note)
-  note <- gsub("\\d{1,3}.*", "", note)
-  note <- gsub("\\s+", "", note)
   note <- gsub("[A-Za-z0-9]", "", note)
 })
 
-d.corpus <- tm_map(d.corpus, removePunctuation)
-d.corpus <- tm_map(d.corpus, removeNumbers)
-
-d.corpus <- tm_map(d.corpus,segmentCN, nature = T) #works well at this step
+d.corpus <- tm_map(d.corpus, segmentCN, nature = T) #works well at this step
 
 
 d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
-  })
+    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+  }) 
   unlist(noun)
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
+})
+
+#backup for the following steps
+
+d.corpus.back -> d.corpus
+
+
+#transfer to the format that tm handels better
+
+d.corpus <- tm_map(d.corpus, segmentCN, returnType = "tm")
+d.corpus <- tm_map(d.corpus, function(note) {
+  gsub("\\s+", "", note)
+})  #Remove the empty spaces among new segments.
+
+
+d.corpus <- tm_map(d.corpus, function(x){
+  paste0(x, collapse = " ")
 })
 
 
-d.corpus <- Corpus(VectorSource(d.corpus))
+d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步以前导致的才c() 问题
 
-myStopWords <- c(stopwordsCN(), "江泽民", "同志" )
+myStopWords <- c(stopwordsCN(), "江泽民", "同志" , "是", "要", "以", "就", "对", "于")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(6, Inf)))
+d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
+
+
+
+
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T))
 
 inspect(corpus[1:3, 1:20]) # detect result
 
-library(topicmodels)
-topic.ctm <- LDA(corpus, k = 3, method = "Gibbs")
+corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
-terms(topic.ctm, 3, .1)
+findFreqTerms(corpus, 5)
+
+##Topic Model Analysis
+topic.lda <- LDA(corpus, k = 5, method = "Gibbs")
+terms(topic.lda, 5)
+
+topic.ctm <- CTM(corpus, k = 5)
+terms(topic.ctm, 5)
+
