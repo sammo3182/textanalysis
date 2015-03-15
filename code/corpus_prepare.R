@@ -164,21 +164,21 @@ d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpu
 
 ##清除注释
 
-d.corpus <- tm_map(d.corpus, removePunctuation)
-d.corpus <- tm_map(d.corpus, removeNumbers)
-d.corpus <- tm_map(d.corpus, function(note){
+d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation))
+d.corpus <- tm_map(d.corpus, content_transformer(removeNumbers))
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){
   note <- gsub("[A-Za-z0-9]", "", note)
-})
+}))
 
-d.corpus <- tm_map(d.corpus, segmentCN, nature = T) #works well at this step
+d.corpus <- tm_map(d.corpus, content_transformer(segmentCN), nature = T) #至此出现c(词)
 
 
-d.corpus <- tm_map(d.corpus, function(sentence) {
+d.corpus <- tm_map(d.corpus, content_transformer(function(sentence) {
   noun <- lapply(sentence, function(w) {
     w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
   unlist(noun)
-})
+})) #由于上一步导致此处无法选择特定类型词，故此法不可行
 
 #backup for the following steps
 
