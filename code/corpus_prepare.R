@@ -182,7 +182,7 @@ d.corpus <- tm_map(d.corpus, function(sentence) {
 
 #backup for the following steps
 
-d.corpus.back -> d.corpus
+
 
 
 #transfer to the format that tm handels better
@@ -192,6 +192,7 @@ d.corpus <- tm_map(d.corpus, function(note) {
   gsub("\\s+", "", note)
 })  #Remove the empty spaces among new segments.
 
+d.corpus.back <- d.corpus
 
 d.corpus <- tm_map(d.corpus, function(x){
   paste0(x, collapse = " ")
@@ -200,7 +201,7 @@ d.corpus <- tm_map(d.corpus, function(x){
 
 d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步以前导致的才c() 问题
 
-myStopWords <- c(stopwordsCN(), "江泽民", "同志" , "是", "要", "以", "就", "对", "于")
+myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
 d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
