@@ -181,19 +181,10 @@ d.corpus <- tm_map(d.corpus, function(sentence) {
 }) #由于上一步导致此处无法选择特定类型词，故此法不可行
 
 
-#transfer to the format that tm handels better
-
-d.corpus <- tm_map(d.corpus, segmentCN, returnType = "tm")
-d.corpus <- tm_map(d.corpus, function(note) {
-  gsub("\\s+", "", note)
-})  #Remove the empty spaces among new segments.
-
-
-
 #backup for the following steps
 d.corpus.back -> d.corpus
 
-
+d.corpus <- list(d.corpus) #http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
 
 d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，非常好的样子，故开始使用content_transfer
 
@@ -201,31 +192,26 @@ myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
 d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
-
-
-d.corpus <- tm_map(d.corpus, content_transformer(function(noun){
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
-})) #用gsub去掉\n, 问题依旧
-
-d.back.vectorcorp -> d.corpus
+d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation)) #文本中含有listc(\)等，试图通过先期手段去除
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
 
 
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf)))) #\n问题依旧
+#corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)))) #\n问题依旧
 
-#corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
 
-inspect(corpus[1:2, 1:10]) # detect result
+inspect(corpus[1:2, 1:30]) # detect result
 
 corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
 findFreqTerms(corpus, 5)
 
 ##Topic Model Analysis
-topic.lda <- LDA(corpus, k = 5, method = "Gibbs")
-terms(topic.lda, 5)
+topic.lda <- LDA(corpus, k = 10, method = "Gibbs")
+terms(topic.lda, 10)
 
 topic.ctm <- CTM(corpus, k = 5)
 terms(topic.ctm, 5)
