@@ -164,25 +164,21 @@ d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpu
 
 ##清除注释
 
-d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation))
-d.corpus <- tm_map(d.corpus, content_transformer(removeNumbers))
-d.corpus <- tm_map(d.corpus, content_transformer(function(note){
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+d.corpus <- tm_map(d.corpus, function(note){
   note <- gsub("[A-Za-z0-9]", "", note)
-}))
+})
 
-d.corpus <- tm_map(d.corpus, content_transformer(segmentCN), nature = T) #至此出现c(词)
+d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
 
 
-d.corpus <- tm_map(d.corpus, content_transformer(function(sentence) {
+d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
     w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
   unlist(noun)
-})) #由于上一步导致此处无法选择特定类型词，故此法不可行
-
-#backup for the following steps
-
-
+}) #由于上一步导致此处无法选择特定类型词，故此法不可行
 
 
 #transfer to the format that tm handels better
@@ -192,29 +188,31 @@ d.corpus <- tm_map(d.corpus, function(note) {
   gsub("\\s+", "", note)
 })  #Remove the empty spaces among new segments.
 
+
+
+#backup for the following steps
 d.corpus.back <- d.corpus
 
-d.corpus <- tm_map(d.corpus, function(x){
-  paste0(x, collapse = " ")
-})
 
 
-d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步以前导致的才c() 问题
+d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，非常好的样子，故开始使用content_transfer
 
 myStopWords <- c(stopwordsCN(), "江泽民", "同志")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
-d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
-d.corpus <- tm_map(d.corpus, removePunctuation)
-d.corpus <- tm_map(d.corpus, removeNumbers)
-d.corpus <- tm_map(d.corpus, content_transformer(function(note){
-  note <- gsub("[A-Za-z0-9]", "", note)
-}))
+d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
+看起来没必要做以下几步
+#d.corpus <- tm_map(d.corpus, content_transformer(removePunctuation))
+#d.corpus <- tm_map(d.corpus, content_transformer(removeNumbers))
+#d.corpus <- tm_map(d.corpus, content_transformer(function(note){
+#  note <- gsub("[A-Za-z0-9]", "", note)
+#}))
 
+d.back.vectorcorp <- d.corpus
 
+#corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf))) #结果出现\n问题
 
-
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T))
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
 
 inspect(corpus[1:3, 1:20]) # detect result
 
