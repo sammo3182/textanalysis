@@ -191,9 +191,13 @@ d.corpus <- tm_map(d.corpus, function(note) {
 
 
 #backup for the following steps
-d.corpus.back <- d.corpus
+d.corpus.back -> d.corpus
 
-
+d.corpus <- tm_map(d.corpus, function(noun){
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
+}) #在VectorSoruce前用gsub去掉\n，问题依旧
 
 d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，非常好的样子，故开始使用content_transfer
 
@@ -208,14 +212,10 @@ d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
 #  note <- gsub("[A-Za-z0-9]", "", note)
 #}))
 
+
 d.back.vectorcorp -> d.corpus
 
 
-d.corpus <- tm_map(d.corpus, content_transformer(function(noun){
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
-})) #用gsub去掉\n, 问题依旧
 
 corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf)))) #\n问题依旧
 
