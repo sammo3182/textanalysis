@@ -210,9 +210,12 @@ d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
 
 d.back.vectorcorp <- d.corpus
 
-#corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf))) #结果出现\n问题
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
+d.corpus <- tm_map(d.corpus, content_transformer(segmentCN), returnType = "tm") #解决多词一组问题，再次segment
+
+corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf)))) #\n问题依旧
+
+#corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
 
 inspect(corpus[1:3, 1:20]) # detect result
 
