@@ -211,13 +211,17 @@ d.corpus <- tm_map(d.corpus, content_transformer(removeWords), myStopWords)
 d.back.vectorcorp -> d.corpus
 
 
-d.corpus <- tm_map(d.corpus, content_transformer(function(x){paste0(x, collapse = "")})) #为解决segment问题而试图去掉\n,但结果是全都黏在了一起。
+d.corpus <- tm_map(d.corpus, content_transformer(function(noun){
+  gsub("[\\r\\n]", "", noun)
+  gsub("\\r\\n", "", noun)
+  gsub("\\n", "", noun)
+})) #用gsub去掉\n, 问题依旧
 
 corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), list(global = c(2,Inf)))) #\n问题依旧
 
 #corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题依旧存在
 
-inspect(corpus) # detect result
+inspect(corpus[1:2, 1:10]) # detect result
 
 corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
