@@ -9,7 +9,7 @@ ipak <- function(pkg){
 packages <- c("dplyr","ggplot2","tm", "tmcn", "Rwordseg", "topicmodels")
 ipak(packages)
 
-#Sys.setlocale(locale = "chinese")
+Sys.setlocale(locale = "Chinese")
 
 #####################RMRB################################
 ##Meta data ####
@@ -33,42 +33,49 @@ metadata$period[metadata$date <= 194912] <- 1
 
 ##Corpus data ####
 
-d.corpus <- Corpus(DirSource("H:/Documents/corpus/rmrb_corpus/monthly", encoding = "UTF-8"), list(language = NA))
+d.corpus <- Corpus(DirSource("H:/Documents/data/rmrb_corpus/monthly/4649", encoding = "UTF-8"), list(language = NA))
 
-## 清除標點符號, 數字
+## 清除標點符號, 數字，和常规用法
+d.corpus <- tm_map(d.corpus, function(word){
+  gsub("本市消息", "", word)
+  gsub("专栏", "", word)
+  gsub("（附图片）", "", word)
+  gsub("（新华社发）", "", word)
+  gsub("（新华社.*?）", "", word)
+  gsub("（.*?记者.*?）", "", word)
+})
+
 d.corpus <- tm_map(d.corpus, removePunctuation)
 d.corpus <- tm_map(d.corpus, removeNumbers)
-
-## 清除大小寫英文與數字
 d.corpus <- tm_map(d.corpus, function(word) {
   gsub("[A-Za-z0-9]", "", word)
 })
 
 ## Segment and selection
-d.corpus <- tm_map(d.corpus, segmentCN, nature = TRUE)
+d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
 
-d.corpus<- tm_map(d.corpus, function(sentence) {
+#4.1 摘取具有名词性质的词汇
+d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
-  })
-  unlist(noun)
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
+    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+  }) 
 })
-
 
 d.corpus <- Corpus(VectorSource(d.corpus))
 
 myStopWords <- c(stopwordsCN(), "专栏", "新华社", "本报", "本报消息", "本报讯", "本市讯", "记者", "报道" )
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf)))
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){  
+  #在VectorSource之后就要用content_transfer来保证corpus结构不变
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
 
+#6. 转化成 DTM
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+#去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
-
-##Converge to stm corpus
-corpus.bi <-readCorpus(corpus, type = "dtm")
+inspect(corpus[1:10, 1:30]) # detect result
 
 
 ####################Selections###########################
