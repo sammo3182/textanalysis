@@ -74,27 +74,82 @@ corpus.bi <-readCorpus(corpus, type = "dtm")
 ####################Selections###########################
 
 #Mao ####
+#分卷####
+mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集.txt")
+
+start.vol1 <- grep("中国社会各阶级的分析", mao)[1]
+end.vol1 <- grep("反对日本进攻的方针、办法和前途", mao)[1]-1
+
+start.vol2 <- grep("反对日本进攻的方针、办法和前途", mao)[1]
+end.vol2 <- grep("《农村调查》的序言和跋", mao)[1]-1
+
+start.vol3 <- grep("《农村调查》的序言和跋", mao)[1]
+end.vol3 <- grep("抗日战争胜利后的时局和我们的方针", mao)[1]-1
+
+start.vol4 <- grep("抗日战争胜利后的时局和我们的方针", mao)[1]
+end.vol4 <- grep("中国人民站起来了", mao)[1]-1
+
+#start.vol5 <- grep("中国人民站起来了", mao)[1]
+#end.vol5 <- length(c(mao,"第五卷终")) #全版第五卷在一个独立文档
+
+vol5 <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoV.txt")
+vol5 <- gsub("（《毛泽东选集》第.*页） ","", mao)
+
+
+vol1 <- mao[start.vol1:end.vol1]
+vol2 <- mao[start.vol2:end.vol2]
+vol3 <- mao[start.vol3:end.vol3]
+vol4 <- mao[start.vol4:end.vol4]
+#vol5 <- mao[start.vol5:end.vol5]
+
+writeLines(vol1, con="E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoI.txt")
+writeLines(vol2, con="E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoII.txt")
+writeLines(vol3, con="E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoIII.txt")
+writeLines(vol4, con="E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoIV.txt")
+writeLines(vol5, con="E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/maoV.txt")
+
 #Clean####
-mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集.txt") #不用UTF-8, 否则不可以正确认读。
+#1. Input the data
+d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/mao/"), list(language = NA))
 
-mao <- gsub("注\\s+释", "", mao)
-mao <- gsub("\\s+〔\\d{1,2}〕.*", "", mao)
-mao <- gsub("-+", "", mao)
-mao <- gsub("\\s+", "", mao)
-mao <- gsub("[A-Za-z0-9]", "", mao)
-#mao <- paste0(mao, collapse = "")
-mao <- removePunctuation(mao)
-mao <- removeNumbers(mao)
-mao <- segmentCN(mao, nature = T)
-mao <- lapply(mao, function(w) {
-  w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
+#2. 清除注释： 
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+d.corpus <- tm_map(d.corpus, function(note){
+  note <- gsub("注释", "", note)
+  note <- gsub("〔〕|〔\\d{1,2}〕", "", note)
+  note <- gsub("[A-Za-z0-9]", "", note)
 })
-mao <- unlist(mao)
 
-myStopWords <- c(stopwordsCN(), "毛泽东", "同志")
-mao <- removeWords(mao, myStopWords)
+#4. 分词
+d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
 
-mao <- mao[sapply(mao, nchar) > 1]  #选择两个字以上的词
+#4.1 摘取具有名词性质的词汇
+d.corpus <- tm_map(d.corpus, function(sentence) {
+  noun <- lapply(sentence, function(w) {
+    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+  }) 
+  ## unlist(noun) #don't do unlist, the way in http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
+})
+
+#5. Convert to VectorSource, 唯一可以转化为DTM的格式
+d.corpus <- Corpus(VectorSource(d.corpus)) 
+
+#5.1 添加停止词
+myStopWords <- c(stopwordsCN(), 
+                 "毛泽东", "同志", "参见",  "参看", "本书", "卷", "注", "见", "第一", "第一卷", "第二卷", "第三卷", "第四卷", "第五卷")
+#5.2 去除"list" 和“c”——这一步至关重要！！！
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){  
+  #在VectorSource之后就要用content_transfer来保证corpus结构不变
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
+
+#6. 转化成 DTM
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+#去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
+
+inspect(corpus[1:5, 1:30]) # detect result
+
 
 
 #Deng ####
@@ -122,90 +177,82 @@ d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpu
 
 ## 清除標點符號, 數字
 
-
 d.corpus <- tm_map(d.corpus, removePunctuation)
 d.corpus <- tm_map(d.corpus, removeNumbers)
-
-## Segment and selection
-
 d.corpus <- tm_map(d.corpus, function(word) {
   gsub("[A-Za-z0-9]", "", word)
-  #paste0(word, collapse = " ") #此步不可用，会导致后面无法正常去除停止词
-})
-
-d.corpus <- tm_map(d.corpus,segmentCN, nature = T) #works well at this step
-
-#d.corpus -> d.corpus.back
-#是一下这步导致的\n问题
-
-d.corpus <- tm_map(d.corpus, function(sentence) {
-  noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("Ag", "a", "ad", "an", "b", "f", "g", "h", "i", "j", "k", "l", "Ng", "n", "nr", "ns", "nt", "nz", "s", "Vg", "v", "vd", "vn", "z")] 
-  })
-  unlist(noun)
-  gsub("[\\r\\n]", "", noun)
-  gsub("\\r\\n", "", noun)
-  gsub("\\n", "", noun)
 })
 
 
-d.corpus <- Corpus(VectorSource(d.corpus))
+##分词和选词
 
-myStopWords <- c(stopwordsCN(), "邓小平", "同志" )
-#d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
-
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf)))
-
-inspect(corpus[1:2, 1:10]) # detect result
-
-#Jiang ####
-#在原文件中找到注释标记“”， 然后替换为空格
-d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang/"), list(language = NA))
-
-##清除注释
-
-d.corpus <- tm_map(d.corpus, removePunctuation)
-d.corpus <- tm_map(d.corpus, removeNumbers)
-d.corpus <- tm_map(d.corpus, function(note){
-  note <- gsub("[A-Za-z0-9]", "", note)
-})
-
-d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
+d.corpus <- tm_map(d.corpus,segmentCN, nature = T) 
 
 
 d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
     w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
-  unlist(noun)
-}) #由于上一步导致此处无法选择特定类型词，故此法不可行
+})
 
+##转化Matrix
+d.corpus <- Corpus(VectorSource(d.corpus))
 
-#backup for the following steps
-d.corpus.back -> d.corpus
-
-d.corpus <- list(d.corpus) #http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
-
-d.corpus <- Corpus(VectorSource(d.corpus)) ##这一步看着没什么问题，非常好的样子，故开始使用content_transfer
-
-myStopWords <- c(stopwordsCN(), "江泽民", "同志")
+myStopWords <- c(stopwordsCN(), "邓小平", "同志", "参见",  "参看", "本书", "卷", "注", "见", "第一", "第一卷", "第二卷", "第三卷")
 #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
 
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
 
-#corpus <- DocumentTermMatrix(d.corpus, control = list(wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)))) #\n问题依旧
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) #\n问题不存在了，但是整个文章被合并为一个文档
+inspect(corpus[1:3, 1:20]) # detect result
 
-inspect(corpus[1, 1:30]) # detect result
 
-corpus <- tm_map(corpus, content_transformer(function(x){gsub("\n", "", x)}))
 
-findFreqTerms(corpus, 5)
+#Jiang ####
+# 1. 在原文件中找到注释标记“” 和“”， 然后替换为空格
+# 2. Input the data
+d.corpus <- Corpus(DirSource("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang/"), list(language = NA))
 
-##Topic Model Analysis
-topic.lda <- LDA(corpus, k = 10, method = "Gibbs")
-terms(topic.lda, 10)
+#3. 清除注释： 对于江泽民文选无法彻底删除注释，因为注释符号也都镶嵌在文章中。
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+d.corpus <- tm_map(d.corpus, function(note){
+  note <- gsub("注\\s+释", "", note)
+  note <- gsub("〔〕|〔\\d{1,2}〕", "", note)
+  note <- gsub("[A-Za-z0-9]", "", note)
+})
 
-topic.ctm <- CTM(corpus, k = 5)
-terms(topic.ctm, 5)
+#4. 分词
+d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
+
+#4.1 摘取具有名词性质的词汇
+d.corpus <- tm_map(d.corpus, function(sentence) {
+  noun <- lapply(sentence, function(w) {
+    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+  }) 
+## unlist(noun) #don't do unlist, the way in http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
+})
+
+#5. Convert to VectorSource, 唯一可以转化为DTM的格式
+d.corpus <- Corpus(VectorSource(d.corpus)) 
+
+#5.1 添加停止词
+myStopWords <- c(stopwordsCN(), "江泽民", "同志", "参见",  "参看", "本书", "卷", "注", "见", "第一", "第一卷", "第二卷", "第三卷")
+
+#5.2 去除"list" 和“c”——这一步至关重要！！！
+d.corpus <- tm_map(d.corpus, content_transformer(function(note){  
+  #在VectorSource之后就要用content_transfer来保证corpus结构不变
+  note <- gsub("[A-Za-z0-9]", "", note)
+}))
+
+#6. 转化成 DTM
+corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+#去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
+
+inspect(corpus[1:3, 1:30]) # detect result
+
+
 
