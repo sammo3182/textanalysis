@@ -6,7 +6,7 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("dplyr","ggplot2","tm", "tmcn", "Rwordseg", "topicmodels")
+packages <- c("tm", "tmcn", "Rwordseg", "topicmodels","ggplot2", "dplyr")
 ipak(packages)
 
 Sys.setlocale(locale = "Chinese")
@@ -30,6 +30,7 @@ metadata$period[metadata$date <= 199012] <- 4
 metadata$period[metadata$date <= 197712] <- 3
 metadata$period[metadata$date <= 196512] <- 2
 metadata$period[metadata$date <= 194912] <- 1
+
 
 ##Corpus data ####
 
@@ -72,7 +73,7 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 }))
 
 #6. 转化成 DTM
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+dtm.rmrb4649 <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 #去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
 inspect(corpus[1:10, 1:30]) # detect result
@@ -152,7 +153,7 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 }))
 
 #6. 转化成 DTM
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+dtm.mao <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 #去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
 inspect(corpus[1:5, 1:30]) # detect result
@@ -212,9 +213,11 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
   note <- gsub("[A-Za-z0-9]", "", note)
 }))
 
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+dtm.deng <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 
 inspect(corpus[1:3, 1:20]) # detect result
+
+
 
 
 
@@ -258,22 +261,31 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 
 
 #6. 转化成 DTM
-corpus.jiang <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+dtm.jiang <- DocumentTermMatrix(d.corpus, 
+                                   control = list(stopwords = myStopWords, 
+                                                  wordLengths = c(2, Inf), 
+                                                  bounds = list(global = c(2,Inf)), 
+                                                  removePunctuation = T, 
+                                                  removeNumbers = T 
+                                                  #, encoding = "UTF-8" encoding function 没什么必要用，未发现产生差别。
+                                                  )) 
 
-#去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
+#使用去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
+#默认weight为 weightTF（TF）, 也可以用wieghtTfIdf，即不只词频而且在多少文章中出现过。
 
-inspect(corpus[1:3, 1:10]) # detect result
+
+inspect(dtm.jiang[1:3, 1:10]) # detect result
 
 
 ####Don't Run:将Document转化成csv方法,但无法转化回去##############
-matrix <- inspect(corpus.jiang)
+matrix <- inspect(dtm.jiang)
 DF <- as.data.frame(matrix, stringsAsFactors = FALSE)
 
-DF <- as.matrix(corpus.jiang)
+DF <- as.matrix(dtm.jiang)
 DF <- Corpus(VectorSource(DF))
 
 DF <- DocumentTermMatrix(DF)
 write.table(DF)
-
+################################################################
 
 
