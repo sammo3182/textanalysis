@@ -255,11 +255,25 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
   note <- gsub("[A-Za-z0-9]", "", note)
 }))
 
+
+
 #6. 转化成 DTM
-corpus <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+corpus.jiang <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
+
 #去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
-inspect(corpus[1:3, 1:30]) # detect result
+inspect(corpus[1:3, 1:10]) # detect result
+
+
+####Don't Run:将Document转化成csv方法,但无法转化回去##############
+matrix <- inspect(corpus.jiang)
+DF <- as.data.frame(matrix, stringsAsFactors = FALSE)
+
+DF <- as.matrix(corpus.jiang)
+DF <- Corpus(VectorSource(DF))
+
+DF <- DocumentTermMatrix(DF)
+write.table(DF)
 
 
 
