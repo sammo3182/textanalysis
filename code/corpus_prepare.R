@@ -71,7 +71,7 @@ for(i in seq(file)){
   }))
   
   #6. 转化成 DTM
-  eval(parse(paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = wieghtTfIdf))")))
+  eval(parse(paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = function(x)weightTfIdf(x, normalize = FALSE)))")))
    
 }
 
@@ -152,7 +152,7 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 dtm.mao <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 #去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
-inspect(corpus[1:5, 1:30]) # detect result
+inspect(dtm.mao[1:5, 1:30]) # detect result
 
 
 
@@ -211,7 +211,7 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 
 dtm.deng <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 
-inspect(corpus[1:3, 1:20]) # detect result
+inspect(dtm.deng[1:3, 1:20]) # detect result
 
 
 
@@ -272,6 +272,8 @@ dtm.jiang <- DocumentTermMatrix(d.corpus,
 
 inspect(dtm.jiang[1:3, 1:10]) # detect result
 
+
+save.image("./code/corpus.sele.RData")
 
 ####Don't Run:将Document转化成csv方法,但无法转化回去##############
 matrix <- inspect(dtm.jiang)
