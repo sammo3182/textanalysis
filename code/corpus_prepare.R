@@ -13,14 +13,9 @@ Sys.setlocale(locale = "Chinese")
 
 #####################RMRB################################
 ##Meta data ####
-file.name <- list.files(path = "H:/Documents/corpus/rmrb_corpus/monthly", full.names = F, recursive = TRUE)
+file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/", full.names = F, recursive = TRUE)
 
-date <- NULL
-
-for(num in seq(file.name)){
-  date <- c(date, as.numeric(gsub("\\D+", "", file.name[num])))
-}
-
+date <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\1\\2",  file.name))
 
 metadata <- data.frame(date = date, period = "")
 
@@ -33,51 +28,52 @@ metadata$period[metadata$date <= 194912] <- 1
 
 
 ##Corpus data ####
-
-d.corpus <- Corpus(DirSource("H:/Documents/data/rmrb_corpus/monthly/4649", encoding = "UTF-8"), list(language = NA))
-
-## 清除標點符號, 數字，和常规用法
-d.corpus <- tm_map(d.corpus, function(word){
-  gsub("本市消息", "", word)
-  gsub("专栏", "", word)
-  gsub("（附图片）", "", word)
-  gsub("（新华社发）", "", word)
-  gsub("（新华社.*?）", "", word)
-  gsub("（.*?记者.*?）", "", word)
-})
-
-d.corpus <- tm_map(d.corpus, removePunctuation)
-d.corpus <- tm_map(d.corpus, removeNumbers)
-d.corpus <- tm_map(d.corpus, function(word) {
-  gsub("[A-Za-z0-9]", "", word)
-})
-
-## Segment and selection
-d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
-
-#4.1 摘取具有名词性质的词汇
-d.corpus <- tm_map(d.corpus, function(sentence) {
-  noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
-  }) 
-})
-
-d.corpus <- Corpus(VectorSource(d.corpus))
-
-myStopWords <- c(stopwordsCN(), "专栏", "新华社", "本报", "本报消息", "本报讯", "本市讯", "记者", "报道" )
-#d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
-
-d.corpus <- tm_map(d.corpus, content_transformer(function(note){  
-  #在VectorSource之后就要用content_transfer来保证corpus结构不变
-  note <- gsub("[A-Za-z0-9]", "", note)
-}))
-
-#6. 转化成 DTM
-dtm.rmrb4649 <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
-#去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
-
-inspect(corpus[1:10, 1:30]) # detect result
-
+file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
+path <- paste0("H:/Documents/data/rmrb_corpus/monthly/", file)
+  
+for(i in seq(file)){
+  d.corpus <- Corpus(DirSource(path[i], encoding = "UTF-8"), list(language = NA))
+  
+  ## 清除標點符號, 數字，和常规用法
+  d.corpus <- tm_map(d.corpus, function(word){
+    gsub("本市消息", "", word)
+    gsub("专栏", "", word)
+    gsub("（附图片）", "", word)
+    gsub("（新华社发）", "", word)
+    gsub("（新华社.*?）", "", word)
+    gsub("（.*?记者.*?）", "", word)
+  })
+  
+  d.corpus <- tm_map(d.corpus, removePunctuation)
+  d.corpus <- tm_map(d.corpus, removeNumbers)
+  d.corpus <- tm_map(d.corpus, function(word) {
+    gsub("[A-Za-z0-9]", "", word)
+  })
+  
+  ## Segment and selection
+  d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
+  
+  #4.1 摘取具有名词性质的词汇
+  d.corpus <- tm_map(d.corpus, function(sentence) {
+    noun <- lapply(sentence, function(w) {
+      w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+    }) 
+  })
+  
+  d.corpus <- Corpus(VectorSource(d.corpus))
+  
+  myStopWords <- c(stopwordsCN(), "专栏", "新华社", "本报", "本报消息", "本报讯", "本市讯", "记者", "报道" )
+  #d.corpus <- tm_map(d.corpus, removeWords, myStopWords)
+  
+  d.corpus <- tm_map(d.corpus, content_transformer(function(note){  
+    #在VectorSource之后就要用content_transfer来保证corpus结构不变
+    note <- gsub("[A-Za-z0-9]", "", note)
+  }))
+  
+  #6. 转化成 DTM
+  eval(parse(paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = wieghtTfIdf))")))
+   
+}
 
 ####################Selections###########################
 
