@@ -7,7 +7,7 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("tm", "tmcn", "xtable" ,"wordcloud", "slam","igraph", "topicmodels","ggplot2", "dplyr")
+packages <- c("tm", "tmcn", "xtable" ,"wordcloud", "slam","igraph", "topicmodels","stm","ggplot2", "dplyr")
 ipak(packages)
 
 #Data load
@@ -121,7 +121,7 @@ jss_TM2 <- list(
   Gibbs = LDA(dtm, k = k, method = "Gibbs", 
               control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000))
   
-save(jss_TM2, file = paste("./code/jss_TM2.Rdata", sep = ""))
+#save(jss_TM2, file = "./code/jss_TM2.Rdata")
 
 termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
 
@@ -156,18 +156,55 @@ E(g)$color =  unlist(lapply(sample(colors()[26:137], 10), function(i) rep(i, 9))
 # 结束保存图片
 #      dev.off()
 
-
+#STM
 ##Converge to stm corpus
-corpus.bi <-readCorpus(corpus, type = "dtm")
+stm.jiang <-readCorpus(dtm.jiang, type = "slam")
+
+file.name <- list.files(path = "E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang", full.names = F, recursive = TRUE)
+
+vol <- gsub(".txt", "",  file.name)
+vol.num <- seq(vol)
+
+meta.jiang <- data.frame(vol = vol, vol.num = vol.num)
+
+out.jiang <- prepDocuments(stm.jiang$documents, stm.jiang$vocab, meta.jiang) #double check the format of the data
+
+jiang.stm <- stm(out.jiang$documents,out.jiang$vocab,K=3,
+                       prevalence =~ s(vol.num),
+                       data=out$meta,seed=313) # K必须要不大于于document数,如数量大时用ngroups option
 
 
+jiang.sel <- selectModel(out.jiang$documents,out.jiang$vocab,K=3,
+                 prevalence =~ s(vol.num),
+                 data=out$meta, run = 3, seed=313) #选择topic数
 
+plotModels(jiang.sel) #靠右上的最好，但在这个case，只有一个，所以不用选择
+jiang.stm <- jiang.sel$runout[[1]]
 
-findFreqTerms(corpus, 5)
+#Don't run: 自动选择较好model
+#storage <- manyTopics(out.jiang$documents, out.jiang$vocab, K=c(2, 3), 
+#                      prevalence =~ s(vol.num), data=out.jiang$meta, run = 3, seed=313)
+#data太小，无法run
 
-##Topic Model Analysis
-topic.lda <- LDA(dtm.jiang, k = 10, method = "Gibbs")
-terms(topic.lda, 20)
+##Interpretation
+###Explain the topics
+#列出FREX：
+labelTopics(jiang.stm, c(1, 2, 3))
 
-topic.ctm <- CTM(dtm.jiang, k = 5)
-terms(topic.ctm, 5)
+#Topic/Metadata relationships
+prep <- estimateEffect(1:3~vol.num, jiang.stm, meta = out.jiang$meta, uncertainty = "Global")
+
+plot.estimateEffect(prep, covariate = "vol.num", topics = 1:3,
+                     model=jiang.stm, method="pointestimate", labeltype = "prob",
+                     xlim=c(-.1,.4))
+#showing that the topics of the three volumn does not change too much
+
+#Cloud of topics
+cloud(jiang.stm, topic = 3)
+
+#Expected proportion of the corpus that belongs to each topic.
+plot.STM(jiang.stm,type="summary")
+
+#Topic correpation
+corr.jiang<-topicCorr(jiang.stm) #method huge cannot be applied, because of the small sample.
+plot.topicCorr(corr.jiang)

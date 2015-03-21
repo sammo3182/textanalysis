@@ -12,13 +12,15 @@ ipak(packages)
 Sys.setlocale(locale = "Chinese")
 
 #####################RMRB################################
-##Meta data ####
+## Index ####
 file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/", full.names = F, recursive = TRUE)
-
 date <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\1\\2",  file.name))
 
 metadata <- data.frame(date = date, period = "")
+file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
+path <- paste0("H:/Documents/data/rmrb_corpus/monthly/", file)
 
+## Meta data ####
 metadata$period <- 5
 
 metadata$period[metadata$date <= 199012] <- 4
@@ -27,10 +29,15 @@ metadata$period[metadata$date <= 196512] <- 2
 metadata$period[metadata$date <= 194912] <- 1
 
 
+for(i in seq(file)){
+  file.name <- list.files(path = path[i])
+  year <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\1",  file.name))
+  month <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\2",  file.name))
+  time <- seq(file.name)
+  eval(parse(text = paste0("meta", file[i], "<- data.frame(time, month, year)")))   
+}
+
 ##Corpus data ####
-file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
-path <- paste0("H:/Documents/data/rmrb_corpus/monthly/", file)
-  
 for(i in seq(file)){
   d.corpus <- Corpus(DirSource(path[i], encoding = "UTF-8"), list(language = NA))
   
@@ -71,7 +78,7 @@ for(i in seq(file)){
   }))
   
   #6. 转化成 DTM
-  eval(parse(paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = function(x)weightTfIdf(x, normalize = FALSE)))")))
+  eval(parse(text = paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = function(x)weightTfIdf(x, normalize = FALSE)))")))
    
 }
 
