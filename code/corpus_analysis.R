@@ -49,7 +49,7 @@ dtm.dem <- DocumentTermMatrix(d.corpus, control = list(dictionary = d, stopwords
 
 matrix <- inspect(dtm.dem)
 DF <- as.data.frame(matrix, stringsAsFactors = FALSE)
-xtable(DF, booktabs=TRUE, caption = "Covariate Balance in Four List Experiments", display=c("f","d", "d", "d"), label = "t:minzhufre")
+xtable(DF, booktabs=TRUE, caption = "Democra- Distribution in Jiang", display=c("f","d", "d", "d"), label = "t:minzhufre")
 
 ##和民主相关的词####
 #这个在小文本里没什么意义，但在大文本（RMRB）中或许有用
@@ -97,8 +97,6 @@ k=c(kv_num)
 df = ctmK[[1]]  # perplexity matrix
 logLik = ctmK[[2]]  # perplexity matrix
 
-#write.csv(data.frame(k, df, logLik), paste(getwd(), "/Perplexity2_","gibbs5_100", ".csv", sep = ""))
-
 png(".paper/figure/perplexity_jiang.png")
 
 matplot(k, df, type = c("b"), xlab = "Number of topics", 
@@ -116,42 +114,24 @@ legend("topright", legend = paste("fold", 1:try_num), col=1, pch=1:try_num)  #Th
 
 dev.off()
 
-## CTM ####
+## Gibbs LDA ####
 k = 10
 SEED <- 313
 jss_TM2 <- list(
-  VEM = LDA(dtm, k = k, control = list(seed = SEED)),
-  VEM_fixed = LDA(dtm, k = k, control = list(estimate.alpha = FALSE, seed = SEED)),
   Gibbs = LDA(dtm, k = k, method = "Gibbs", 
-              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000)),
-  CTM = CTM(dtm, k = k, 
-            control = list(seed = SEED, var = list(tol = 10^-4), em = list(tol = 10^-3))) )   
+              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000))
+  
 save(jss_TM2, file = paste("./code/jss_TM2.Rdata", sep = ""))
-#save(jss_TM, file = paste(getwd(), "/jss_TM1.Rdata", sep = ""))
 
-termsForSave1<- terms(jss_TM2[["VEM"]], 10)
-termsForSave2<- terms(jss_TM2[["VEM_fixed"]], 10)
-termsForSave3<- terms(jss_TM2[["Gibbs"]], 10)
-termsForSave4 <- terms(jss_TM2[["CTM"]], 10)
+termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
 
-#write.csv(as.data.frame(t(termsForSave1)), 
-#          paste(getwd(), "/topic-document_", "_VEM_", k, "_2.csv", sep=""),
-#          fileEncoding = "UTF-8")
 
-#write.csv(as.data.frame(t(termsForSave2)), 
-#          paste(getwd(), "/topic-document_", "_VEM_fixed_", k, "_2.csv", sep=""),
-#          fileEncoding = "UTF-8")
-
-#write.csv(as.data.frame(t(termsForSave3)), 
-#          paste(getwd(), "/topic-document_", "_Gibbs_", k, "_2.csv", sep=""),
-#          fileEncoding = "UTF-8")
-write.csv(as.data.frame(t(termsForSave4)), "./code/ctm.jiang.csv", fileEncoding = "UTF-8")
-
+write.csv(as.data.frame(t(termsForSave)), "./code/gibs.jiang.csv", fileEncoding = "UTF-8")
 
 
 #'topic graphs'
 
-tfs = as.data.frame(termsForSave4, stringsAsFactors = F);tfs[,1]
+tfs = as.data.frame(termsForSave3, stringsAsFactors = F);tfs[,1]
 adjacent_list = lapply(1:5, function(i) embed(tfs[,i], 2)[, 2:1]) 
 edgelist = as.data.frame(do.call(rbind, adjacent_list), stringsAsFactors =F)
 topic = unlist(lapply(1:5, function(i) rep(i, 9)))
@@ -160,10 +140,8 @@ edgelist$topic = topic
 #需要igraph包
 g <-graph.data.frame(edgelist,directed=T )
 l<-layout.fruchterman.reingold(g)
-# edge.color="black"
 nodesize = centralization.degree(g)$res 
 V(g)$size = log( centralization.degree(g)$res )
-
 nodeLabel = V(g)$name
 E(g)$color =  unlist(lapply(sample(colors()[26:137], 10), function(i) rep(i, 9))); unique(E(g)$color)
 
@@ -175,7 +153,7 @@ E(g)$color =  unlist(lapply(sample(colors()[26:137], 10), function(i) rep(i, 9))
       plot(g, vertex.label= nodeLabel,  edge.curved=TRUE, 
            vertex.label.cex =1,  edge.arrow.size=0.2, layout=l )
       
-      # 结束保存图片
+# 结束保存图片
 #      dev.off()
 
 
