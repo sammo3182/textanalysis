@@ -60,11 +60,12 @@ for(i in seq(file)){
   
   ## Segment and selection
   d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
-  
+  eval(parse(text = paste0("save(d.corpus, file = 'H:/Documents/data/rmrb_corpus/segment/corpus", file[i], ".Rdata')")))
+
   #4.1 摘取具有名词性质的词汇
   d.corpus <- tm_map(d.corpus, function(sentence) {
     noun <- lapply(sentence, function(w) {
-      w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+      w[names(w) %in% c("a", "ad","an", "b", "i", "j", "l", "ng","nr", "n", "nt", "nz", "s", "vn", "z")] 
     }) 
   })
   
