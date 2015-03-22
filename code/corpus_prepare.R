@@ -17,6 +17,7 @@ file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/", full.na
 date <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\1\\2",  file.name))
 
 metadata <- data.frame(date = date, period = "")
+
 file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
 path <- paste0("H:/Documents/data/rmrb_corpus/monthly/", file)
 

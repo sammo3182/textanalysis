@@ -7,20 +7,206 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("tm", "tmcn", "xtable" ,"wordcloud", "slam","igraph", "topicmodels","stm","ggplot2", "dplyr")
+packages <- c("tm", "tmcn", "xtable" ,"wordcloud", "slam","igraph", "topicmodels","stm","ggplot2", "tidyr","dplyr")
 ipak(packages)
 
 #Data load
-#corpus.rmrb, corpus.mao, corpus.deng, corpus.jiang from corpus_prepare.R
+load("./code/corpus.rmrb.Rdata.RData")
 
 #RMRB####
+
+file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
+
+# 1. Descriptive###
+# 1.1 词云 ####
+dtm.list <- paste0("dtm.rmrb", file)
+
+eval(parse(text = paste0("m <- as.matrix(",dtm.list[1],")")))
+v <- sort(colSums(m), decreasing=TRUE)
+myNames <- names(v)
+d <- data.frame(word=myNames, freq=v)
+par(mar = rep(1, 4))
+
+par(mar=rep(.2, 4))
+pal2 <- brewer.pal(8,"Dark2")
+
+wordcloud(d$word,d$freq, scale=c(3.2,.2), min.freq=mean(d$freq),
+          max.words=100, random.order=FALSE, rot.per=.15, 
+          colors=pal2)
+
+# 重复上述步骤四遍，由于未知原因，loop不管用####
+eval(parse(text = paste0("m <- as.matrix(",dtm.list[2],")")))
+v <- sort(colSums(m), decreasing=TRUE)
+myNames <- names(v)
+d <- data.frame(word=myNames, freq=v)
+par(mar = rep(1, 4))
+
+par(mar=rep(.2, 4))
+pal2 <- brewer.pal(8,"Dark2")
+
+
+wordcloud(d$word,d$freq, scale=c(3.2,.2), min.freq=mean(d$freq),
+          max.words=100, random.order=FALSE, rot.per=.15, 
+          colors=pal2)
+
+
+eval(parse(text = paste0("m <- as.matrix(",dtm.list[3],")")))
+v <- sort(colSums(m), decreasing=TRUE)
+myNames <- names(v)
+d <- data.frame(word=myNames, freq=v)
+par(mar = rep(1, 4))
+
+par(mar=rep(.2, 4))
+pal2 <- brewer.pal(8,"Dark2")
+
+wordcloud(d$word,d$freq, scale=c(3.2,.2), min.freq=mean(d$freq),
+          max.words=100, random.order=FALSE, rot.per=.15, 
+          colors=pal2)
+
+
+eval(parse(text = paste0("m <- as.matrix(",dtm.list[4],")")))
+v <- sort(colSums(m), decreasing=TRUE)
+myNames <- names(v)
+d <- data.frame(word=myNames, freq=v)
+par(mar = rep(1, 4))
+
+par(mar=rep(.2, 4))
+pal2 <- brewer.pal(8,"Dark2")
+
+wordcloud(d$word,d$freq, scale=c(3.2,.2), min.freq=mean(d$freq),
+          max.words=100, random.order=FALSE, rot.per=.15, 
+          colors=pal2)
+
+
+
+eval(parse(text = paste0("m <- as.matrix(",dtm.list[5],")")))
+v <- sort(colSums(m), decreasing=TRUE)
+myNames <- names(v)
+d <- data.frame(word=myNames, freq=v)
+par(mar = rep(1, 4))
+
+par(mar=rep(.2, 4))
+pal2 <- brewer.pal(8,"Dark2")
+
+
+wordcloud(d$word,d$freq, scale=c(3.2,.2), min.freq=mean(d$freq),
+          max.words=100, random.order=FALSE, rot.per=.15, 
+          colors=pal2)
+
+# 1.2 民主相关 ####
+dem.times <- NULL
+month.total <- NULL
+term.list <- paste0("dtm.rmrb", file, "$dimnames$Terms")
+doc.list <- paste0("dtm.rmrb", file, "$dimnames$Docs")
+
+for(i in seq(term.list)){
+  eval(parse(text = paste0("times <- length(grep('民主',", term.list[i],"))")))
+  dem.times <- c(dem.times, times)
+  
+  eval(parse(text = paste0("times <- length(", doc.list[i],") ")))
+  month.total <- c(month.total, times)
+}
+
+desc.table <- data.frame(period = c("Pre-Liberation", "PRC Founding", "Cultural Revolution", "Pre-Tian'anmen", "Post-Tian'anmen"), year = c("1946-1949", "1950-1965", "1966-1977", "1978-1991", "1992-2003"), month.total, dem.times)
+
+colnames(desc.table) <- c("Period", "Year", "Month", "Freq. of 'Democra-'")
+xtable(desc.table, booktabs=TRUE, caption = "Corpus Description", display=c("f","s","s", "d", "d"), label = "t:describ")
+
+# 1.3 民主临近 ####
+dem4649 <- data.frame(inspect(dtm.rmrb4649[1:dtm.rmrb4649$nrow, c("民主化", "民主改革")])) %>% summarise(sum(民主化), sum(民主改革))
+
+dem5065 <- data.frame(inspect(dtm.rmrb5065[1:dtm.rmrb4649$nrow, c("民主化", "民主改革")])) %>% summarise(sum(民主化), sum(民主改革))
+
+dem6677 <- data.frame(inspect(dtm.rmrb6677[1:dtm.rmrb4649$nrow, c("民主化", "民主改革")])) %>% summarise(sum(民主化), sum(民主改革))
+
+dem7891 <- data.frame(inspect(dtm.rmrb7891[1:dtm.rmrb4649$nrow, c("民主化", "民主改革")])) %>% summarise(sum(民主化), sum(民主改革))
+
+dem9203 <- data.frame(inspect(dtm.rmrb9203[1:dtm.rmrb4649$nrow, c("民主化", "民主改革")])) %>% summarise(sum(民主化), sum(民主改革))
+
+
+dem.stat <- bind_rows(dem4649, dem5065, dem6677, dem7891, dem9203)
+
+desc.table <- bind_cols(desc.table, dem.stat)
+
+colnames(desc.table) <- c("Period", "Year", "Month", "Freq. of 'Democra-'", "'Democratization'", "'Democratic Reform'")
+xtable(desc.table, booktabs=TRUE, caption = "Corpus Description", display=c("f","s","s", "d", "d", "d", "d"), label = "t:describ")
+
+desc.graph <- select(desc.table, Period, 5:6) %>% gather("Category", "Democra", 2:3)
+
+ggplot(data=desc.graph, aes(x=Period, y=Democra, fill=Category)) + 
+  geom_bar(stat="identity",
+           position=position_dodge(),
+           size=.3) +                        # Thinner lines
+  scale_x_discrete(limits=c("Pre-Liberation", "PRC Founding", 
+                            "Cultural Revolution","Pre-Tian'anmen", "Post-Tian'anmen")) +
+  scale_fill_hue(name="Democra-") +      # Set legend title
+  xlab("Period") + ylab("Frequency") + # Set axis labels
+  theme_bw() + 
+  theme(legend.justification=c(0,0), legend.position=c(0.65,0.5))
+
+ggsave("demodestri.png", path = "./paper/figure/")
+
+# 2. STM####
+##Converge to stm corpus
+stm4649 <-readCorpus(dtm.rmrb4649, type = "slam")
+
+file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/4649", full.names = F, recursive = TRUE)
+
+vol <- gsub(".txt", "",  file.name)
+vol.num <- seq(vol)
+
+meta.jiang <- data.frame(vol = vol, vol.num = vol.num)
+
+out.jiang <- prepDocuments(stm.jiang$documents, stm.jiang$vocab, meta.jiang) #double check the format of the data
+
+jiang.stm <- stm(out.jiang$documents,out.jiang$vocab,K=3,
+                 prevalence =~ s(vol.num),
+                 data=out$meta,seed=313) # K必须要不大于于document数,如数量大时用ngroups option
+
+
+jiang.sel <- selectModel(out.jiang$documents,out.jiang$vocab,K=3,
+                         prevalence =~ s(vol.num),
+                         data=out$meta, run = 3, seed=313) #选择topic数
+
+plotModels(jiang.sel) #靠右上的最好，但在这个case，只有一个，所以不用选择
+jiang.stm <- jiang.sel$runout[[1]]
+
+#Don't run: 自动选择较好model
+#storage <- manyTopics(out.jiang$documents, out.jiang$vocab, K=c(2, 3), 
+#                      prevalence =~ s(vol.num), data=out.jiang$meta, run = 3, seed=313)
+#data太小，无法run
+
+##Interpretation
+###Explain the topics
+#列出FREX：
+labelTopics(jiang.stm, c(1, 2, 3))
+
+#Topic/Metadata relationships
+prep <- estimateEffect(1:3~vol.num, jiang.stm, meta = out.jiang$meta, uncertainty = "Global")
+
+plot.estimateEffect(prep, covariate = "vol.num", topics = 1:3,
+                    model=jiang.stm, method="pointestimate", labeltype = "prob",
+                    xlim=c(-.1,.4))
+#showing that the topics of the three volumn does not change too much
+
+#Cloud of topics
+cloud(jiang.stm, topic = 3)
+
+#Expected proportion of the corpus that belongs to each topic.
+plot.STM(jiang.stm,type="summary")
+
+#Topic correpation
+corr.jiang<-topicCorr(jiang.stm) #method huge cannot be applied, because of the small sample.
+plot.topicCorr(corr.jiang)
+
+#############################################
 
 #Mao####
 
 #Deng####
 
 #Jiang######
-#Descriptive analysis####
+# 1. Descriptive analysis####
 
 ##出现频率最高的词
 findFreqTerms(dtm.jiang, 2000)
@@ -38,10 +224,9 @@ wordcloud(d$word,d$freq, scale=c(5,.2), min.freq=mean(d$freq),
           colors=pal2)
 #save by the "export" function of R studio. The command way left too much empty in the graph.
 
+# 2. 民主相关#####
 
-##民主相关#####
-
-#查找####
+# 2.1 查找####
 grep("民主", corpus$dimnames$Terms, value = T) #找出跟民主有关的词儿，因为不一定“民主会独立存在”
 
 d <- c("民主化", "民主改革","民主集中制")
@@ -51,7 +236,7 @@ matrix <- inspect(dtm.dem)
 DF <- as.data.frame(matrix, stringsAsFactors = FALSE)
 xtable(DF, booktabs=TRUE, caption = "Democra- Distribution in Jiang", display=c("f","d", "d", "d"), label = "t:minzhufre")
 
-##和民主相关的词####
+## 2.2 和民主相关的词####
 #这个在小文本里没什么意义，但在大文本（RMRB）中或许有用
 # Word association: The number under each word is an association score, so the search term always occurs with the search term.
 
@@ -67,9 +252,9 @@ colnames(dem.com) <- c("Democratization", "Democratic Reform", "Democratic Centr
 
 write.csv(dem.com, "./paper/table/dem.jiang.csv", fileEncoding = "UTF-8")
 
-#Topic Model####
+# 3. Topic Model####
 source("./code/extra.function.R") #需要提前根据model调整simulation 类型。
-## 确定主题数量####
+## 3.1 确定主题数量####
 dtm <- dtm.jiang
 ##先对文本-词矩阵进行简单处理，以消除高频词被高估和低频词被低估的问题。
 term_tfidf <-tapply(dtm$v/row_sums(dtm)[dtm$i], dtm$j, mean) * log2(nDocs(dtm)/col_sums(dtm > 0))
@@ -114,7 +299,7 @@ legend("topright", legend = paste("fold", 1:try_num), col=1, pch=1:try_num)  #Th
 
 dev.off()
 
-## Gibbs LDA ####
+## 3.2 Gibbs LDA ####
 k = 10
 SEED <- 313
 jss_TM2 <- list(
