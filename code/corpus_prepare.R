@@ -81,14 +81,16 @@ for(i in seq(file)){
   
   #6. 转化成 DTM
   eval(parse(text = paste0("dtm.rmrb", file[i], " <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)),removePunctuation = T, removeNumbers = T, weight = function(x)weightTfIdf(x, normalize = FALSE)))")))
-   
 }
 
+save(meta4649, meta5056, meta6677, meta7891, meta9203, metadata,
+     dtm.rmrb4649, dtm.rmrb5065, dtm.rmrb6677, dtm.rmrb7891, file = dtm.rmrb.Rdata)
 ####################Selections###########################
 
 #Mao ####
 #分卷####
-mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集.txt")
+mao <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/毛泽东选集I-V(1).txt")
+
 
 start.vol1 <- grep("中国社会各阶级的分析", mao)[1]
 end.vol1 <- grep("反对日本进攻的方针、办法和前途", mao)[1]-1
@@ -134,13 +136,14 @@ d.corpus <- tm_map(d.corpus, function(note){
   note <- gsub("[A-Za-z0-9]", "", note)
 })
 
+
 #4. 分词
 d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
 
 #4.1 摘取具有名词性质的词汇
 d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+    w[names(w) %in% c("a", "ad","an", "b", "i", "j", "l", "ng","nr", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
   ## unlist(noun) #don't do unlist, the way in http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
 })
@@ -161,7 +164,7 @@ d.corpus <- tm_map(d.corpus, content_transformer(function(note){
 dtm.mao <- DocumentTermMatrix(d.corpus, control = list(stopwords = myStopWords, wordLengths = c(2, Inf), bounds = list(global = c(2,Inf)), removePunctuation = T, removeNumbers = T)) 
 #去除停止词 + 限制词长度至少为2 + 词频至少出现过2两次+ 去除标点 + 去除数字
 
-inspect(dtm.mao[1:5, 1:30]) # detect result
+inspect(dtm.mao[1:3, 1:10]) # detect result
 
 
 
@@ -204,7 +207,7 @@ d.corpus <- tm_map(d.corpus,segmentCN, nature = T)
 
 d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+    w[names(w) %in% c("a", "ad","an", "b", "i", "j", "l", "ng","nr", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
 })
 
@@ -246,7 +249,7 @@ d.corpus <- tm_map(d.corpus, segmentCN, nature = T)
 #4.1 摘取具有名词性质的词汇
 d.corpus <- tm_map(d.corpus, function(sentence) {
   noun <- lapply(sentence, function(w) {
-    w[names(w) %in% c("an", "b", "i", "j", "l", "Ng", "n", "nt", "nz", "s", "vn", "z")] 
+    w[names(w) %in% c("a", "ad","an", "b", "i", "j", "l", "ng","nr", "n", "nt", "nz", "s", "vn", "z")] 
   }) 
 ## unlist(noun) #don't do unlist, the way in http://cos.name/cn/topic/158164/#post-408754 中ricklovelisa方法
 })
@@ -282,7 +285,8 @@ dtm.jiang <- DocumentTermMatrix(d.corpus,
 inspect(dtm.jiang[1:3, 1:10]) # detect result
 
 
-save.image("./code/corpus.sele.RData")
+save(dtm.mao, dtm.deng, dtm.jiang, 
+     file = "E:/Dropbox_sync/Method/Data/corpus/Selection corpus/dtm.sele.Rdata" )
 
 ####Don't Run:将Document转化成csv方法,但无法转化回去##############
 matrix <- inspect(dtm.jiang)
