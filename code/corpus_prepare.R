@@ -168,6 +168,7 @@ inspect(dtm.mao[1:3, 1:10]) # detect result
 
 
 
+
 #Deng ####
 ##分卷####
 deng <- readLines("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/邓小平文选.txt", encoding = "UTF-8")
