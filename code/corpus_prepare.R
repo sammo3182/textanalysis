@@ -32,11 +32,14 @@ metadata$period[metadata$date <= 194912] <- 1
 
 for(i in seq(file)){
   file.name <- list.files(path = path[i])
+  file.path <- list.files(path = path[i], full.names = T)
   year <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\1",  file.name))
   month <- as.numeric(gsub(".*(\\d{4})\\s(\\d{2}).*", "\\2",  file.name))
   time <- seq(file.name)
-  eval(parse(text = paste0("meta", file[i], "<- data.frame(time, month, year)")))   
+  eval(parse(text = paste0("meta", file[i], "<- data.frame(time, month, year, file.path)")))   
 }
+
+
 
 ##Corpus data ####
 for(i in seq(file)){
