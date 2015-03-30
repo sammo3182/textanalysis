@@ -13,9 +13,6 @@ ipak(packages)
 source("E:/Dropbox_sync/Method/R/functions/multiplot.r")
 
 
-file <- as.numeric(list.files("H:/Documents/data/rmrb_corpus/monthly/"))
-dtm.list <- paste0("dtm.rmrb", file)
-
 
 #RMRB####
 #Data load
@@ -195,6 +192,8 @@ topicsele4649 <- selectModel(out4649$documents,out4649$vocab,K=20, ngroups = 4,
 plotModels(jiang.sel) #靠右上的最好，但在这个case，只有一个，所以不用选择
 jiang.stm <- jiang.sel$runout[[1]]
 
+
+
 #Don't run: 自动选择较好model
 #storage <- manyTopics(out4649$documents, out4649$vocab, K=c(2, 3), 
 #                      prevalence =~ s(vol.num), data=out4649$meta, run = 3, seed=313)
@@ -223,15 +222,25 @@ plot.STM(jiang.stm,type="summary")
 corr4649<-topicCorr(jiang.stm) #method huge cannot be applied, because of the small sample.
 plot.topicCorr(corr4649)
 
+
+
+
+# Define the topics
+## Use the three most representative article, and find which includes democracy or so.
+findThoughts(mod.out, topic=2, texts=as.character(meta$path),n=10)$docs
+
+
+
+
 #############################################
 # Data loading
-load("H:\Documents\data\Selection corpus\dtm.sele.Rdata")
+load("H:/Documents/data/Selection corpus/dtm.sele.Rdata")
 load("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/dtm.sele.Rdata")
 source("./code/extra.function.R") #需要提前根据model调整simulation 类型。
 
 
 #Mao####
-##词云
+##1. 词云####
 m <- as.matrix(dtm.mao)
 v <- sort(colSums(m), decreasing=TRUE)
 myNames <- names(v)
@@ -290,9 +299,49 @@ axis(side=1, at=seq(0, 100, by = 10)) # therefore 20 topics
 dev.off()
 
 
+## 3.2 Gibbs LDA ####
+k = 10
+SEED <- 313
+jss_TM2 <- list(
+  Gibbs = LDA(dtm, k = k, method = "Gibbs", 
+              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000)))
+
+#save(jss_TM2, file = "./code/jss_TM2.Rdata")
+
+termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
+
+write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.mao.csv", fileEncoding = "UTF-8")
+# Topic 1, 6, 7 has democracy
+
+#'topic graphs'
+
+tfs = as.data.frame(termsForSave, stringsAsFactors = F);tfs[,1]
+adjacent_list = lapply(1:10, function(i) embed(tfs[,i], 2)[, 2:1]) 
+edgelist = as.data.frame(do.call(rbind, adjacent_list), stringsAsFactors =F)
+topic = unlist(lapply(1:10, function(i) rep(i, 9)))
+edgelist$topic = topic
+
+
+#需要igraph包
+g <-graph.data.frame(edgelist,directed=T )
+l<-layout.fruchterman.reingold(g)
+nodesize = centralization.degree(g)$res 
+V(g)$size = log( centralization.degree(g)$res )
+nodeLabel = V(g)$name
+
+E(g)$color =  unlist(lapply(sample(colors()[26:137], 10, replace = T), function(i) rep(i, 9))); unique(E(g)$color)
+
+plot(g, vertex.label= nodeLabel,  edge.curved=TRUE, 
+     vertex.label.cex = 1,  edge.arrow.size=0.2, layout=l)
+
+# Then mark the topics manually
+
+
+
+
 
 #Deng####
-##词云
+##1. 词云####
 m <- as.matrix(dtm.deng)
 v <- sort(colSums(m), decreasing=TRUE)
 myNames <- names(v)
@@ -349,6 +398,44 @@ matplot(k, df, type = c("b"), xlab = "Number of Topics",
 axis(side=1, at=seq(0, 100, by = 10)) # therefore 10 topics
 
 dev.off()
+
+
+## 3.2 Gibbs LDA ####
+k = 10
+SEED <- 313
+jss_TM2 <- list(
+  Gibbs = LDA(dtm, k = k, method = "Gibbs", 
+              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000)))
+
+#save(jss_TM2, file = "./code/jss_TM2.Rdata")
+
+termsForSave<- terms(jss_TM2[["Gibbs"]], 20)
+
+write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.deng.csv", fileEncoding = "UTF-8")
+# Topic 5 has democracy
+
+#'topic graphs'
+
+tfs = as.data.frame(termsForSave, stringsAsFactors = F);tfs[,1]
+adjacent_list = lapply(1:10, function(i) embed(tfs[,i], 2)[, 2:1]) 
+edgelist = as.data.frame(do.call(rbind, adjacent_list), stringsAsFactors =F)
+topic = unlist(lapply(1:10, function(i) rep(i, 9)))
+edgelist$topic = topic
+
+
+#需要igraph包
+g <-graph.data.frame(edgelist,directed=T )
+l<-layout.fruchterman.reingold(g)
+nodesize = centralization.degree(g)$res 
+V(g)$size = log( centralization.degree(g)$res )
+nodeLabel = V(g)$name
+E(g)$color =  unlist(lapply(sample(colors()[26:137], 10, replace = T), function(i) rep(i, 9))); unique(E(g)$color)
+
+plot(g, vertex.label= nodeLabel,  edge.curved=TRUE, 
+     vertex.label.cex = 1,  edge.arrow.size=0.2, layout=l)
+
+# Then mark the topics manually
+
 
 
 
@@ -425,31 +512,29 @@ axis(side=1, at=seq(0, 100, by = 10)) # therefore 10 topics
 
 dev.off()
 
-
-
-
 ## 3.2 Gibbs LDA ####
 k = 10
 SEED <- 313
 jss_TM2 <- list(
   Gibbs = LDA(dtm, k = k, method = "Gibbs", 
-              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000))
+              control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000)))
   
 #save(jss_TM2, file = "./code/jss_TM2.Rdata")
 
 termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
 
 
-write.csv(as.data.frame(t(termsForSave)), "./code/gibs.jiang.csv", fileEncoding = "UTF-8")
-
+write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.jiang.csv", fileEncoding = "UTF-8")
+# Topic 5 has democracy
 
 #'topic graphs'
 
-tfs = as.data.frame(termsForSave3, stringsAsFactors = F);tfs[,1]
-adjacent_list = lapply(1:5, function(i) embed(tfs[,i], 2)[, 2:1]) 
+tfs = as.data.frame(termsForSave, stringsAsFactors = F);tfs[,1]
+adjacent_list = lapply(1:10, function(i) embed(tfs[,i], 2)[, 2:1]) 
 edgelist = as.data.frame(do.call(rbind, adjacent_list), stringsAsFactors =F)
-topic = unlist(lapply(1:5, function(i) rep(i, 9)))
+topic = unlist(lapply(1:10, function(i) rep(i, 9)))
 edgelist$topic = topic
+
 
 #需要igraph包
 g <-graph.data.frame(edgelist,directed=T )
@@ -457,68 +542,9 @@ l<-layout.fruchterman.reingold(g)
 nodesize = centralization.degree(g)$res 
 V(g)$size = log( centralization.degree(g)$res )
 nodeLabel = V(g)$name
-E(g)$color =  unlist(lapply(sample(colors()[26:137], 10), function(i) rep(i, 9))); unique(E(g)$color)
+E(g)$color =  unlist(lapply(sample(colors()[26:137], 10, replace = T), function(i) rep(i, 9))); unique(E(g)$color)
+  
+   plot(g, vertex.label= nodeLabel,  edge.curved=TRUE, 
+           vertex.label.cex = 1,  edge.arrow.size=0.2, layout=l)
 
-# 保存图片格式
-#png(  paste(getwd(), "/topic_graph_gibbs.png", sep=""）,
-#            width=5, height=5, 
-#            units="in", res=700)
-      
-      plot(g, vertex.label= nodeLabel,  edge.curved=TRUE, 
-           vertex.label.cex =1,  edge.arrow.size=0.2, layout=l )
-      
-# 结束保存图片
-#      dev.off()
-
-#STM####
-##Converge to stm corpus
-stm.jiang <-readCorpus(dtm.jiang, type = "slam")
-
-file.name <- list.files(path = "E:/Dropbox_sync/Method/Data/corpus/Selection corpus/jiang", full.names = F, recursive = TRUE)
-
-vol <- gsub(".txt", "",  file.name)
-vol.num <- seq(vol)
-
-meta.jiang <- data.frame(vol = vol, vol.num = vol.num)
-
-out.jiang <- prepDocuments(stm.jiang$documents, stm.jiang$vocab, meta.jiang) #double check the format of the data
-
-jiang.stm <- stm(out.jiang$documents,out.jiang$vocab,K=3,
-                       prevalence =~ s(vol.num),
-                       data=out$meta,seed=313) # K必须要不大于于document数,如数量大时用ngroups option
-
-
-jiang.sel <- selectModel(out.jiang$documents,out.jiang$vocab,K=3,
-                 prevalence =~ s(vol.num),
-                 data=out$meta, run = 3, seed=313) #选择topic数
-
-plotModels(jiang.sel) #靠右上的最好，但在这个case，只有一个，所以不用选择
-jiang.stm <- jiang.sel$runout[[1]]
-
-#Don't run: 自动选择较好model
-#storage <- manyTopics(out.jiang$documents, out.jiang$vocab, K=c(2, 3), 
-#                      prevalence =~ s(vol.num), data=out.jiang$meta, run = 3, seed=313)
-#data太小，无法run
-
-##Interpretation
-###Explain the topics
-#列出FREX：
-labelTopics(jiang.stm, c(1, 2, 3))
-
-#Topic/Metadata relationships
-prep <- estimateEffect(1:3~vol.num, jiang.stm, meta = out.jiang$meta, uncertainty = "Global")
-
-plot.estimateEffect(prep, covariate = "vol.num", topics = 1:3,
-                     model=jiang.stm, method="pointestimate", labeltype = "prob",
-                     xlim=c(-.1,.4))
-#showing that the topics of the three volumn does not change too much
-
-#Cloud of topics
-cloud(jiang.stm, topic = 3)
-
-#Expected proportion of the corpus that belongs to each topic.
-plot.STM(jiang.stm,type="summary")
-
-#Topic correpation
-corr.jiang<-topicCorr(jiang.stm) #method huge cannot be applied, because of the small sample.
-plot.topicCorr(corr.jiang)
+# Then mark the topics manually
