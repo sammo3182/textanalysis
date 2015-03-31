@@ -7,7 +7,7 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("tm", "tmcn", "xtable" ,"wordcloud", "slam","igraph", "topicmodels","stm","ggplot2", "tidyr","dplyr")
+packages <- c("xtable" ,"wordcloud", "slam","igraph", "topicmodels","stm","ggplot2", "tidyr","dplyr")
 ipak(packages)
 
 source("E:/Dropbox_sync/Method/R/functions/multiplot.r")
@@ -16,7 +16,8 @@ source("E:/Dropbox_sync/Method/R/functions/multiplot.r")
 
 #RMRB####
 #Data load
-load("E:/Dropbox_sync/Method/Data/corpus/RMRB corpus/segment/dtm.rmrbII.RData")
+#load("E:/Dropbox_sync/Method/Data/corpus/RMRB corpus/segment/dtm.rmrbII.RData")
+load("E:/Dropbox_sync/Method/Data/corpus/RMRB corpus/segment/stm.rmrb_withpath.RData")
 
 # 1. Descriptive###
 # 1.1 词云 ####
@@ -172,7 +173,7 @@ multiplot(demoI, demoII)
 
 
 # 2. STM####
-##Converge to stm corpus
+## 2.1 4649 ####
 corpus4649 <-readCorpus(dtm.rmrb4649, type = "slam")
 
 file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/4649", full.names = F, recursive = TRUE)
@@ -223,11 +224,137 @@ corr4649<-topicCorr(jiang.stm) #method huge cannot be applied, because of the sm
 plot.topicCorr(corr4649)
 
 
+#2.2 15-Topic version###########
+##Converge to stm corpus
+meta6677<- meta6677[meta6677$time < 144,] 
+# There was when I ran the 6677 an error ("Complete cases in prevalence covariate does not match the number of documents."). It is because in the readCorpus step, only 143 files was read rather than 144. I have no idea why that happens. The solution is just for convenience, that delete one line in the metadata.
+
+for (i in 1:length(file)) {
+  eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+  eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+  eval(parse(text = paste0("topicsele", file[i], "<- selectModel(out$documents,out$vocab,K=15, ngroups = 20, 
+                           prevalence =~ month + s(time),
+                           data=out$meta, run = 20, seed=313)")))
+  
+  eval(parse(text = paste0("png('/home/users/yhu/Documents/figure/msele", file[i], "', width = 623, height = 477)")))
+  eval(parse(text = paste0("plotModels(topicsele",file[i], ")")))
+  
+  dev.off()
+}
+
+#4649(4) 5065(3) 6677(4) 7891(2) 9203(4)
 
 
-# Define the topics
+
+# 2.3 4649####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele4649$runout[[4]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm4649.csv", fileEncoding = "UTF-8")
+#search in excel (Topic 7)
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
 ## Use the three most representative article, and find which includes democracy or so.
-findThoughts(mod.out, topic=2, texts=as.character(meta$path),n=10)$docs
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta4649$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- c("Production","United Front","Disciplines","Eco-Life","Logistics","Worker Organization","Within-Group Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Political Regime","Class Division","City Organization")
+
+
+# 2.3 5056####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele5065$runout[[3]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm5065.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta5065$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- c("State-Building (D)","United Front","Worker Organization","Revolutionary Principles","Culture Building","Political Regime","War Remnants","Production","Diplomacy","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News")
+
+
+# 2.3 6677####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele6677$runout[[4]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm6677.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta6677$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- c("Gang of Four","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","Diplomacy (D)")
+
+
+# 2.3 7891####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele7891$runout[[2]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm7891.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta7891$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- c("Focus Transfer","Collective Ownship (D)","Reform and Opening","Working Organization","Market Economy","National Policy","Culture Sports","Redressment","Education","Daily Life","Developing Direction","Foreign Affairs","Ideology","Trade","United Front")
+
+
+
+# 2.3 9203####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele9203$runout[[4]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm9203.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta9203$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- c("National Stability","Market Economy","Organization and Supervision","Spiritual Civilization","Socialist Development","Daily Life","Ideology","Governing","Opening","Developing Strategy (D)","Leadership","Economic Reform","Achievements","Responsibility","Institutional COnstruction")
 
 
 
@@ -511,6 +638,7 @@ matplot(k, df, type = c("b"), xlab = "Number of Topics",
 axis(side=1, at=seq(0, 100, by = 10)) # therefore 10 topics
 
 dev.off()
+
 
 ## 3.2 Gibbs LDA ####
 k = 10
