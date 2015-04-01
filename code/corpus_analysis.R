@@ -173,58 +173,8 @@ multiplot(demoI, demoII)
 
 
 # 2. STM####
-## 2.1 4649 ####
-corpus4649 <-readCorpus(dtm.rmrb4649, type = "slam")
 
-file.name <- list.files(path = "H:/Documents/data/rmrb_corpus/monthly/4649", full.names = F, recursive = TRUE)
-
-
-out4649 <- prepDocuments(corpus4649$documents, corpus4649$vocab, meta4649) #double check the format 
-
-stm4649 <- stm(out4649$documents,out4649$vocab,K=3,
-                 prevalence =~ s(vol.num),
-                 data=out$meta,seed=313) # K必须要不大于于document数,如数量大时用ngroups option
-
-
-topicsele4649 <- selectModel(out4649$documents,out4649$vocab,K=20, ngroups = 4,
-                         prevalence =~ month + s(time),
-                         data=out4649$meta, run = 20, seed=313) #选择topic数
-
-plotModels(jiang.sel) #靠右上的最好，但在这个case，只有一个，所以不用选择
-jiang.stm <- jiang.sel$runout[[1]]
-
-
-
-#Don't run: 自动选择较好model
-#storage <- manyTopics(out4649$documents, out4649$vocab, K=c(2, 3), 
-#                      prevalence =~ s(vol.num), data=out4649$meta, run = 3, seed=313)
-#data太小，无法run
-
-##Interpretation
-###Explain the topics
-#列出FREX：
-labelTopics(jiang.stm, c(1, 2, 3))
-
-#Topic/Metadata relationships
-prep <- estimateEffect(1:3~vol.num, jiang.stm, meta = out4649$meta, uncertainty = "Global")
-
-plot.estimateEffect(prep, covariate = "vol.num", topics = 1:3,
-                    model=jiang.stm, method="pointestimate", labeltype = "prob",
-                    xlim=c(-.1,.4))
-#showing that the topics of the three volumn does not change too much
-
-#Cloud of topics
-cloud(jiang.stm, topic = 3)
-
-#Expected proportion of the corpus that belongs to each topic.
-plot.STM(jiang.stm,type="summary")
-
-#Topic correpation
-corr4649<-topicCorr(jiang.stm) #method huge cannot be applied, because of the small sample.
-plot.topicCorr(corr4649)
-
-
-#2.2 15-Topic version###########
+#2.1 15-Topic version###########
 ##Converge to stm corpus
 meta6677<- meta6677[meta6677$time < 144,] 
 # There was when I ran the 6677 an error ("Complete cases in prevalence covariate does not match the number of documents."). It is because in the readCorpus step, only 143 files was read rather than 144. I have no idea why that happens. The solution is just for convenience, that delete one line in the metadata.
@@ -245,85 +195,18 @@ for (i in 1:length(file)) {
 #4649(4) 5065(3) 6677(4) 7891(2) 9203(4)
 
 topicnames.full <- data.frame(c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build"),
-                              c("State Construction (D)","United Front(M)","Worker Org","Revol Strategy","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News"),
+                              c("State Construction (D)","United Front","Worker Org","Revol Strategy (M)","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News"),
                               c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)"),
                               c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front"),
-                              c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","Ideo Education","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional COnstruction")
+                              c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","China Style Development","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional Construction")
                               )
-colnames(topicnames.full) <- paste0("Period ", file)
+colnames(topicnames.full) <- c("Pre-Liberation", "PRC Founding", "Cultural Revolution","Pre-Tian'anmen", "Post-Tian'anmen")
 
 
 topic.table <-  xtable(topicnames.full, label = "t:toplist",caption='Topic List of STM in Each Period')
 print(topic.table, booktabs = T, hline.after = c(-1,0:14, nrow(topic.table)))
 
-
-# 2.3 4649####
-# 2.3.1 Select the best model (based on the graph produced in 2.2)
-mod.out <- topicsele4649$runout[[4]]
-
-# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
-
-topicslists <- labelTopics(mod.out,n=30)
-
-write.csv(as.data.frame(topicslists$prob), "./paper/table/stm4649.csv", fileEncoding = "UTF-8")
-#search in excel (Topic 7)
-
-# 2.3.3 Define the topics
-labelTopics(mod.out,n=10)
-## Use the three most representative article, and find which includes democracy or so.
-### not works, because the file is by month.
-#findThoughts(mod.out, topic=1, texts=as.character(meta4649$file.path))$docs
-
-# Identify the topics by "Highest" and "FREX"
-
-topicnames <- c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build(M)")
-
-
-# 2.3 5065####
-# 2.3.1 Select the best model (based on the graph produced in 2.2)
-mod.out <- topicsele5065$runout[[3]]
-
-# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
-
-topicslists <- labelTopics(mod.out,n=30)
-
-write.csv(as.data.frame(topicslists$prob), "./paper/table/stm5065.csv", fileEncoding = "UTF-8")
-#search in excel
-
-# 2.3.3 Define the topics
-labelTopics(mod.out,n=10)
-## Use the three most representative article, and find which includes democracy or so.
-### not works, because the file is by month.
-#findThoughts(mod.out, topic=1, texts=as.character(meta5065$file.path))$docs
-
-# Identify the topics by "Highest" and "FREX"
-
-topicnames <- c("State Construction (D)","United Front(M)","Worker Org","Revol Strategy","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News")
-
-
-# 2.3 6677####
-# 2.3.1 Select the best model (based on the graph produced in 2.2)
-mod.out <- topicsele6677$runout[[4]]
-
-# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
-
-topicslists <- labelTopics(mod.out,n=30)
-
-write.csv(as.data.frame(topicslists$prob), "./paper/table/stm6677.csv", fileEncoding = "UTF-8")
-#search in excel
-
-# 2.3.3 Define the topics
-labelTopics(mod.out,n=10)
-## Use the three most representative article, and find which includes democracy or so.
-### not works, because the file is by month.
-#findThoughts(mod.out, topic=1, texts=as.character(meta6677$file.path))$docs
-
-# Identify the topics by "Highest" and "FREX"
-
-topicnames <- c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)")
-
-
-# 2.3 7891####
+# 2.1.1 Example: 7891####
 # 2.3.1 Select the best model (based on the graph produced in 2.2)
 mod.out <- topicsele7891$runout[[2]]
 
@@ -342,7 +225,8 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front")
+topicnames <- as.character(topicnames.full[,4])
+#topicnames <- c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front")
 
 
 ## Translation of frequency terms
@@ -405,7 +289,6 @@ write.csv(as.data.frame(topic.table), "./paper/table/topiceg.csv", fileEncoding 
 
 # Then use excel open it, run "\shortstack[l]{"&C2&"}" to change the lines in latex, and then convert to latex
 
-
 ## Topic network figure#####
 
 ## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
@@ -415,8 +298,8 @@ i <- 4
 eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
 eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
 
-
-wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+# line 2 is the word count for each word
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,]))) 
 ## there are fractional wordcounts due to variational approximation.
 round(mod.out$theta[,1] * wordcounts,2)
 
@@ -445,8 +328,9 @@ diag(mat2) <- 0
 mat2
 ## rename this object as "out"
 out <- mat2
-which(out == max(out[2,]), arr.in = T)
-corMD <- data.frame(out[2,13], )
+maxtopic <- topicnames[which(out == max(out[2,]), arr.in = T)[1]]
+corMD <- data.frame(out[2,13], max(out[2,]))
+
 
 ## set a seed so that it's reproducable
 set.seed(313)
@@ -514,6 +398,374 @@ dev.off()
 
 
 
+# 2.1.2 4649####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele4649$runout[[4]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm4649.csv", fileEncoding = "UTF-8")
+#search in excel (Topic 7)
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta4649$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- as.character(topicnames.full[,1])
+#topicnames <- c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build")
+
+## Topic network figure#####
+
+## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
+
+## I use this vector of wordcounts
+i <- 1
+eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+
+
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+## there are fractional wordcounts due to variational approximation.
+round(mod.out$theta[,1] * wordcounts,2)
+
+## Calculate the proportion of words devoted to topics
+topicPropsInCorpus <- rep(NA,15)
+for(i in 1:15){
+  topicPropsInCorpus[i] <- (sum(mod.out$theta[,i] * wordcounts))/sum(wordcounts)
+}
+## This now holds the topic proportions in the corpus
+topicPropsInCorpus
+## sums to one, as it should
+sum(topicPropsInCorpus)
+## add the topic labels
+names(topicPropsInCorpus) <- topicnames
+
+## Plot the network
+## using a non-binary distance matrix
+mat2 <- cor(mod.out$theta) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+mat2[mat2<0] <- 0
+## setting the diagonal to zero
+diag(mat2) <- 0
+## this gives us positive correlations between topics
+mat2
+## rename this object as "out"
+out <- mat2
+maxtopic <- c(maxtopic,topicnames[which(out == max(out[7,]), arr.in = T)[1]])
+corMD <- rbind(corMD, c(out[7,14], max(out[7,])))
+
+# run the regression on month
+prep1 <- estimateEffect(1:15 ~ month, mod.out, meta4649)
+prep <- plot.estimateEffect(prep1, "month", model=mod.out, custom.labels=topicnames,labeltype="custom")
+
+
+## make the graph object
+g <- graph.adjacency(out, mode="undirected", weighted=T)
+if(length(labels)==0) labels = paste("Topic", topics)
+## make the edges thickness proportional to correlation
+
+edges <- get.edgelist(g)
+edgecors <- rep(NA,nrow(edges))
+for(i in 1:nrow(edges)){
+  edgecors[i] <- cor(mod.out$theta)[edges[i,1],edges[i,2]]
+}
+edge.width=35*edgecors
+## look at and set other graph parameters
+E(g)$weight
+E(g)$size <- 1
+E(g)$lty <- 1
+E(g)$color <- "black"
+
+#Make the colors indicate the direction of the coefficient
+## get the estimates
+est <- unlist(lapply(prep$means,function(x){return(x[1])}))
+## get colors
+mycols <- rev(colorRampPalette(c("red", "white", "blue"), bias=1)( 20 )) ## (n)
+## assign the color category for each coeff
+summary(est)
+colcat <- rep(NA,length(est))
+for(i in 1:length(colcat)){
+  colcat[i] <- max(which(est[i] > seq(.02,.23,length.out=21)))
+}
+## These are now the color category for each coefficient
+colcat
+## and these are the associated colors
+mycols[colcat]
+## This checks to make sure the colors are working as I expect
+## Blue should be on the left and red on the right.
+plot(est,1:15,pch=19,cex=2,col=mycols[colcat]);abline(v=0)
+
+## label the vertices
+V(g)$label=topicnames
+## set the size of vertices proportional to the proportion in the corpus
+V(g)$size <- topicPropsInCorpus*200
+## set the color of vertices
+vertex.color = mycols[colcat]
+
+## pull out the weights to include in the layout
+wts <- E(g)$weight
+## make the layout
+mylayout <- layout.fruchterman.reingold(g,weight=wts)
+## start the image file
+png("./paper/figure/cor4649.png", width = 3000, height = 1273)
+## do the plot
+plot(g, layout=mylayout,edge.color=edge.color,vertex.color=vertex.color, vertex.label.cex=vertex.label.cex, vertex.label.color=vertex.label.color,edge.width=edge.width)
+## close the image file
+dev.off()
+## I then rearrange with photoshop to move the outlying vertices closer in
+
+
+# 2.3 5065####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele5065$runout[[3]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm5065.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta5065$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- as.character(topicnames.full[,2])
+#topicnames <- c("State Construction (D)","United Front(M)","Worker Org","Revol Strategy","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News")
+
+## Topic network figure#####
+
+## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
+
+## I use this vector of wordcounts
+i <- 2
+eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+
+
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+## there are fractional wordcounts due to variational approximation.
+
+## Calculate the proportion of words devoted to topics
+topicPropsInCorpus <- rep(NA,15)
+for(i in 1:15){
+  topicPropsInCorpus[i] <- (sum(mod.out$theta[,i] * wordcounts))/sum(wordcounts)
+}
+## This now holds the topic proportions in the corpus
+topicPropsInCorpus
+## sums to one, as it should
+sum(topicPropsInCorpus)
+## add the topic labels
+names(topicPropsInCorpus) <- topicnames
+
+## Plot the network
+## using a non-binary distance matrix
+mat2 <- cor(mod.out$theta) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+mat2[mat2<0] <- 0
+## setting the diagonal to zero
+diag(mat2) <- 0
+## this gives us positive correlations between topics
+mat2
+## rename this object as "out"
+out <- mat2
+maxtopic <- c(maxtopic,topicnames[which(out == max(out[1,]), arr.in = T)[1]])
+corMD <- rbind(corMD, c(out[1,4], max(out[1,])))
+
+# run the regression on month
+prep1 <- estimateEffect(1:15 ~ month, mod.out, meta5065)
+prep <- plot.estimateEffect(prep1, "month", model=mod.out, custom.labels=topicnames,labeltype="custom")
+
+
+## make the graph object
+g <- graph.adjacency(out, mode="undirected", weighted=T)
+if(length(labels)==0) labels = paste("Topic", topics)
+## make the edges thickness proportional to correlation
+
+edges <- get.edgelist(g)
+edgecors <- rep(NA,nrow(edges))
+for(i in 1:nrow(edges)){
+  edgecors[i] <- cor(mod.out$theta)[edges[i,1],edges[i,2]]
+}
+edge.width=35*edgecors
+## look at and set other graph parameters
+E(g)$weight
+E(g)$size <- 1
+E(g)$lty <- 1
+E(g)$color <- "black"
+
+#Make the colors indicate the direction of the coefficient
+## get the estimates
+est <- unlist(lapply(prep$means,function(x){return(x[1])}))
+## get colors
+mycols <- rev(colorRampPalette(c("red", "white", "blue"), bias=1)( 20 )) ## (n)
+## assign the color category for each coeff
+summary(est)
+colcat <- rep(NA,length(est))
+for(i in 1:length(colcat)){
+  colcat[i] <- max(which(est[i] > seq(.04,.1,length.out=21)))
+}
+## These are now the color category for each coefficient
+colcat
+## and these are the associated colors
+mycols[colcat]
+## This checks to make sure the colors are working as I expect
+## Blue should be on the left and red on the right.
+plot(est,1:15,pch=19,cex=2,col=mycols[colcat]);abline(v=0)
+
+## label the vertices
+V(g)$label=topicnames
+## set the size of vertices proportional to the proportion in the corpus
+V(g)$size <- topicPropsInCorpus*200
+## set the color of vertices
+vertex.color = mycols[colcat]
+
+## pull out the weights to include in the layout
+wts <- E(g)$weight
+## make the layout
+mylayout <- layout.fruchterman.reingold(g,weight=wts)
+## start the image file
+png("./paper/figure/cor5065.png", width = 3000, height = 1273)
+## do the plot
+plot(g, layout=mylayout,edge.color=edge.color,vertex.color=vertex.color, vertex.label.cex=vertex.label.cex, vertex.label.color=vertex.label.color,edge.width=edge.width)
+## close the image file
+dev.off()
+
+
+# 2.3 6677####
+# 2.3.1 Select the best model (based on the graph produced in 2.2)
+mod.out <- topicsele6677$runout[[4]]
+
+# 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
+
+topicslists <- labelTopics(mod.out,n=30)
+
+write.csv(as.data.frame(topicslists$prob), "./paper/table/stm6677.csv", fileEncoding = "UTF-8")
+#search in excel
+
+# 2.3.3 Define the topics
+labelTopics(mod.out,n=10)
+## Use the three most representative article, and find which includes democracy or so.
+### not works, because the file is by month.
+#findThoughts(mod.out, topic=1, texts=as.character(meta6677$file.path))$docs
+
+# Identify the topics by "Highest" and "FREX"
+
+topicnames <- as.character(topicnames.full[,3])
+#topicnames <- c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)")
+
+## Topic network figure#####
+
+## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
+
+## I use this vector of wordcounts
+i <- 3
+eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+
+
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+## there are fractional wordcounts due to variational approximation.
+
+## Calculate the proportion of words devoted to topics
+topicPropsInCorpus <- rep(NA,15)
+for(i in 1:15){
+  topicPropsInCorpus[i] <- (sum(mod.out$theta[,i] * wordcounts))/sum(wordcounts)
+}
+## This now holds the topic proportions in the corpus
+topicPropsInCorpus
+## sums to one, as it should
+sum(topicPropsInCorpus)
+## add the topic labels
+names(topicPropsInCorpus) <- topicnames
+
+## Plot the network
+## using a non-binary distance matrix
+mat2 <- cor(mod.out$theta) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+mat2[mat2<0] <- 0
+## setting the diagonal to zero
+diag(mat2) <- 0
+## this gives us positive correlations between topics
+mat2
+## rename this object as "out"
+out <- mat2
+maxtopic <- c(maxtopic,topicnames[which(out == max(out[15,]), arr.in = T)[2]])
+corMD <- rbind(corMD, c(out[15,10], max(out[15,])))
+
+# run the regression on month
+prep1 <- estimateEffect(1:15 ~ month, mod.out, meta6677[1:143,])
+prep <- plot.estimateEffect(prep1, "month", model=mod.out, custom.labels=topicnames,labeltype="custom")
+
+
+## make the graph object
+g <- graph.adjacency(out, mode="undirected", weighted=T)
+if(length(labels)==0) labels = paste("Topic", topics)
+## make the edges thickness proportional to correlation
+
+edges <- get.edgelist(g)
+edgecors <- rep(NA,nrow(edges))
+for(i in 1:nrow(edges)){
+  edgecors[i] <- cor(mod.out$theta)[edges[i,1],edges[i,2]]
+}
+edge.width=35*edgecors
+## look at and set other graph parameters
+E(g)$weight
+E(g)$size <- 1
+E(g)$lty <- 1
+E(g)$color <- "black"
+
+#Make the colors indicate the direction of the coefficient
+## get the estimates
+est <- unlist(lapply(prep$means,function(x){return(x[1])}))
+## get colors
+mycols <- rev(colorRampPalette(c("red", "white", "blue"), bias=1)( 20 )) ## (n)
+## assign the color category for each coeff
+summary(est)
+colcat <- rep(NA,length(est))
+for(i in 1:length(colcat)){
+  colcat[i] <- max(which(est[i] > seq(.02,.11,length.out=21)))
+}
+## These are now the color category for each coefficient
+colcat
+## and these are the associated colors
+mycols[colcat]
+## This checks to make sure the colors are working as I expect
+## Blue should be on the left and red on the right.
+plot(est,1:15,pch=19,cex=2,col=mycols[colcat]);abline(v=0)
+
+## label the vertices
+V(g)$label=topicnames
+## set the size of vertices proportional to the proportion in the corpus
+V(g)$size <- topicPropsInCorpus*200
+## set the color of vertices
+vertex.color = mycols[colcat]
+
+## pull out the weights to include in the layout
+wts <- E(g)$weight
+## make the layout
+mylayout <- layout.fruchterman.reingold(g,weight=wts)
+## start the image file
+png("./paper/figure/cor6677.png", width = 3000, height = 1273)
+## do the plot
+plot(g, layout=mylayout,edge.color=edge.color,vertex.color=vertex.color, vertex.label.cex=vertex.label.cex, vertex.label.color=vertex.label.color,edge.width=edge.width)
+## close the image file
+dev.off()
+
+
 
 # 2.3 9203 ####
 # 2.3.1 Select the best model (based on the graph produced in 2.2)
@@ -533,9 +785,135 @@ labelTopics(mod.out,n=10)
 #findThoughts(mod.out, topic=1, texts=as.character(meta9203$file.path))$docs
 
 # Identify the topics by "Highest" and "FREX"
+topicnames <- as.character(topicnames.full[,5])
+#topicnames <- c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","Ideo Education","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional COnstruction")
 
-topicnames <- c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","Ideo Education","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional COnstruction")
+## Topic network figure#####
 
+## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
+
+## I use this vector of wordcounts
+i <- 5
+eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+
+
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+## there are fractional wordcounts due to variational approximation.
+
+## Calculate the proportion of words devoted to topics
+topicPropsInCorpus <- rep(NA,15)
+for(i in 1:15){
+  topicPropsInCorpus[i] <- (sum(mod.out$theta[,i] * wordcounts))/sum(wordcounts)
+}
+## This now holds the topic proportions in the corpus
+topicPropsInCorpus
+## sums to one, as it should
+sum(topicPropsInCorpus)
+## add the topic labels
+names(topicPropsInCorpus) <- topicnames
+
+## Plot the network
+## using a non-binary distance matrix
+mat2 <- cor(mod.out$theta) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+mat2[mat2<0] <- 0
+## setting the diagonal to zero
+diag(mat2) <- 0
+## this gives us positive correlations between topics
+mat2
+## rename this object as "out"
+out <- mat2
+maxtopic <- c(maxtopic,topicnames[which(out == max(out[10,]), arr.in = T)[2]])
+corMD <- rbind(corMD, c(out[10,14], max(out[10,])))
+
+# run the regression on month
+prep1 <- estimateEffect(1:15 ~ month, mod.out, meta9203)
+prep <- plot.estimateEffect(prep1, "month", model=mod.out, custom.labels=topicnames,labeltype="custom")
+
+
+## make the graph object
+g <- graph.adjacency(out, mode="undirected", weighted=T)
+if(length(labels)==0) labels = paste("Topic", topics)
+## make the edges thickness proportional to correlation
+
+edges <- get.edgelist(g)
+edgecors <- rep(NA,nrow(edges))
+for(i in 1:nrow(edges)){
+  edgecors[i] <- cor(mod.out$theta)[edges[i,1],edges[i,2]]
+}
+edge.width=35*edgecors
+## look at and set other graph parameters
+E(g)$weight
+E(g)$size <- 1
+E(g)$lty <- 1
+E(g)$color <- "black"
+
+#Make the colors indicate the direction of the coefficient
+## get the estimates
+est <- unlist(lapply(prep$means,function(x){return(x[1])}))
+## get colors
+mycols <- rev(colorRampPalette(c("red", "white", "blue"), bias=1)( 20 )) ## (n)
+## assign the color category for each coeff
+summary(est)
+colcat <- rep(NA,length(est))
+for(i in 1:length(colcat)){
+  colcat[i] <- max(which(est[i] > seq(.04,.09,length.out=21)))
+}
+## These are now the color category for each coefficient
+colcat
+## and these are the associated colors
+mycols[colcat]
+## This checks to make sure the colors are working as I expect
+## Blue should be on the left and red on the right.
+plot(est,1:15,pch=19,cex=2,col=mycols[colcat]);abline(v=0)
+
+## label the vertices
+V(g)$label=topicnames
+## set the size of vertices proportional to the proportion in the corpus
+V(g)$size <- topicPropsInCorpus*200
+## set the color of vertices
+vertex.color = mycols[colcat]
+
+## pull out the weights to include in the layout
+wts <- E(g)$weight
+## make the layout
+mylayout <- layout.fruchterman.reingold(g,weight=wts)
+## start the image file
+png("./paper/figure/cor9203.png", width = 3000, height = 1273)
+## do the plot
+plot(g, layout=mylayout,edge.color=edge.color,vertex.color=vertex.color, vertex.label.cex=vertex.label.cex, vertex.label.color=vertex.label.color,edge.width=edge.width)
+## close the image file
+dev.off()
+
+
+# Correlation Present ####
+corMD2 <- corMD
+order <- c("2", "3", "1", "4", "5")
+corMD <- corMD[match(order, rownames(corMD)),]
+maxtopic <- maxtopic[match(c(2, 3, 1, 4, 5), seq(maxtopic))]
+
+cor.table <- cbind(period = c("Pre-Liberation", "PRC Founding", "Cultural Revolution", "Pre-Tian'anmen", "Post-Tian'anmen"), corMD, maxtopic)
+colnames(cor.table) <- c("Period","Democracy vs. Guardianship", "Max(Corr) with Democracy", "Max(Corr) Topic")
+
+cor.graph <- gather(cor.table, "Period", "Correlation", 2:3)[,c(1,3,4)]
+
+
+pd <- position_dodge(0.1)
+ggplot(data = cor.graph, aes(x = Period, y = Correlation, color = Period.1, ymax=max(Correlation)*1.05)) + 
+  geom_line(position=pd, aes(group=Period.1), size = 1) + 
+  geom_point(position=pd, size = 3) + 
+  scale_x_discrete(limits=c("Pre-Liberation", "PRC Founding", "Cultural Revolution", "Pre-Tian'anmen", "Post-Tian'anmen")) + 
+  scale_colour_hue(name="Category",  l=40)  +
+  ggtitle("Average bill for 2 people") +     # Set title
+  theme_bw() + 
+  theme(legend.position=c(.85, .25))  
+
+ggsave("./paper/figure/cordyn.png")
+
+cor.table.pr <-  xtable(cor.table, label = "t:cortab",caption='Correlations of the Democratic Topic with Others')
+print(cor.table.pr, booktabs = T, hline.after = c(-1, 0, nrow(corMD)))
 
 
 
