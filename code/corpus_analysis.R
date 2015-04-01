@@ -244,6 +244,17 @@ for (i in 1:length(file)) {
 
 #4649(4) 5065(3) 6677(4) 7891(2) 9203(4)
 
+topicnames.full <- data.frame(c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build"),
+                              c("State Construction (D)","United Front(M)","Worker Org","Revol Strategy","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News"),
+                              c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)"),
+                              c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front"),
+                              c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","Ideo Education","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional COnstruction")
+                              )
+colnames(topicnames.full) <- paste0("Period ", file)
+
+
+topic.table <-  xtable(topicnames.full, label = "t:toplist",caption='Topic List of STM in Each Period')
+print(topic.table, booktabs = T, hline.after = c(-1,0:14, nrow(topic.table)))
 
 
 # 2.3 4649####
@@ -265,10 +276,10 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("Production","United Front","Disciplines","Eco-Life","Logistics","Worker Organization","Within-Group Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Political Regime","Class Division","City Organization")
+topicnames <- c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build(M)")
 
 
-# 2.3 5056####
+# 2.3 5065####
 # 2.3.1 Select the best model (based on the graph produced in 2.2)
 mod.out <- topicsele5065$runout[[3]]
 
@@ -287,7 +298,7 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("State-Building (D)","United Front","Worker Organization","Revolutionary Principles","Culture Building","Political Regime","War Remnants","Production","Diplomacy","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News")
+topicnames <- c("State Construction (D)","United Front(M)","Worker Org","Revol Strategy","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News")
 
 
 # 2.3 6677####
@@ -309,7 +320,7 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("Gang of Four","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","Diplomacy (D)")
+topicnames <- c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)")
 
 
 # 2.3 7891####
@@ -318,7 +329,7 @@ mod.out <- topicsele7891$runout[[2]]
 
 # 2.3.2 Draw first 30 terms. Which has "democracy," then the topic is identified as democratic topic.
 
-topicslists <- labelTopics(mod.out,n=30)
+topicslists <- labelTopics(mod.out,n=10)
 
 write.csv(as.data.frame(topicslists$prob), "./paper/table/stm7891.csv", fileEncoding = "UTF-8")
 #search in excel
@@ -331,11 +342,180 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("Focus Transfer","Collective Ownship (D)","Reform and Opening","Working Organization","Market Economy","National Policy","Culture Sports","Redressment","Education","Daily Life","Developing Direction","Foreign Affairs","Ideology","Trade","United Front")
+topicnames <- c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front")
+
+
+## Translation of frequency terms
+englishF <- c("problem, economy, production, people, important, government, working unit, relevant, countryside, management", ## topic 1
+              "work, production, life, research, serious, mission, democracy, in fact, people, party committee", ## topic 2
+              "reform, jobs, economy, international cooperation, life, foundation, years, our country, science and technology", ## topic 3
+              " comrades, conference, situation, technique, cadre, planning, development, department, local, our country ", ## topic 4
+              "journalist, market, main, representative, business, funding, level, research, institution, law", ## topic 5
+              " column, region, nation, business, policy, measure, effect, daily newspaper, education, comrade", ## topic 6
+              " technology, culture, game, world, foundation, idea, relevant, product, focus, majority", ## topic 7
+              " country, Gang of Four, comrade, leadership, revolution, agriculture, commune member, idea, aspect, region ", ## topic 8
+              " country, education, idea, regulation, investment, city, student, worker, individuals, children ", ## topic 9
+              " company, government, department, agriculture, people, bank, president, research, advice, military", ## 10
+              " construction, staff, committee, world, country, central, spiritual, activity, youth, army ", ## 11
+              " country, region, politics, business, measure, policy, effect, education, Li Peng, development", ## 12
+              " Masses, development, socialism, international, cadre, history, politics, revolution, experience, delegation", ## 13
+              " enterprise, development, the whole country, aspect, leadership, society,peasantry, relationship, career, management", ## 14
+              "Prime Minister, enthusiasm, friendship, chairman, solidarity, head, Labor Party, oversea Chinese, complete, united front") ## 15
+
+## Translation of FREX terms
+englishFREX <- c("modification, conference, school, rich, family, association of science and technology, weak, position, muslim, cheap", ## 1
+                 "textile, bad action, collective ownership, light industry, industry and transportation, modest, agriculture-carpentry-animal-husbandry", ## 2
+                 "government and enterprises, computers, ten-thousand household, multi-channel, horizontal, professional ethics, important news, developmental, tiao-kuai relation, opening up ", ## 3
+                 "constitution, craft, amateur, distribution, high school, court, proportion, streets, doctor, tropical ", ## 4
+                 "concepts, structure, coach, capital, market, chemical weapons, satellite, expense, interest, monographs ", ## 5
+                 " column, 12th party conference, guide, four modernizations, five stresses and four points of beauty, national army, suzuki, civility, household responsibility, unemployed youth ", ## 6
+                 "game, shopping malls, bill, Chinese team, diving, peasantry, Mainland, popular, fixed assets, TV show", ## 7
+                 "Gang of Four, the Revolutionary Committee, pernicious influence, extreme left, revisionism, production team, commune team, Da-zhai, oversea victim, working point", ## 8
+                 "author, lack, primary school, morality, census, wealthy, children, vegetable, voter, politics and law ", ## 9
+                 "Olympic Games, county head, final, price, bank, patient, motorcycle, body, reputation, series ", ## 10
+                 "staff, committee, transformation, external, extensive, compatriot, checking, hard, party branch, central ", ## 11
+                 " European Community, clean government, the Asian Games, Li Tieying, manipulation AIDS, Kaifu, dedication, high-tech, three-funded enterprises ", ## 12
+                 " experience, delegation, agreement, ambassadors, the General Assembly, contribution, the Speaker, CCP, enthusiasm, martyr ", ## 13
+                 " woman, security, exit, agricultural product, certificate, total sale, pharmaceutical, the entire city, provisional ", ## 14
+                 " the people, chairman, Prime Minister, policy, issue, friendship, relationship, the whole country, minister, solidarity") ## 15
+
+
+## simple regression plot
+prep1 <- estimateEffect(1:15 ~ month, mod.out, meta7891)
+prep <- plot.estimateEffect(prep1, "month", model=mod.out, custom.labels=topicnames,labeltype="custom")
+
+## add the words 
+k <- 8  ## this is the number of words to use -- I use 8 because it fits nicely
+## put the words into a holder
+holder <- c()
+for(i in 1:15){
+  holder[i] <- paste("F:",paste(strsplit(englishF[i],", ")[[1]][1:k],collapse=", "),
+                     ## this line has a special k to make the words fit
+                     "\\\\F:",paste(topicslists$prob[i,1:k],collapse=", "),
+                     "\\\\FREX:",paste(strsplit(englishFREX[i],", ")[[1]][1:min(c(k,length(strsplit(englishFREX[i],", ")[[1]])))],collapse=", "),
+                     "\\\\FREX:",paste(topicslists$frex[i,1:k],collapse=", "), "" )
+}
+
+
+topic.table <- data.frame(topicnames, holder)
+
+colnames(topic.table) <- c("Topic", "Word Frequencies")
+
+write.csv(as.data.frame(topic.table), "./paper/table/topiceg.csv", fileEncoding = "UTF-8")
+
+# Then use excel open it, run "\shortstack[l]{"&C2&"}" to change the lines in latex, and then convert to latex
+
+
+## Topic network figure#####
+
+## Size of Topic: Size depends on how you calculate it.  mod.out$theta is a D-by-K matrix with document d in 1:D and its loading onto each topic.  If you want frequency by word tokens then you just have to multiply through the word counts within each document.
+
+## I use this vector of wordcounts
+i <- 4
+eval(parse(text = paste0("corpus <-readCorpus(dtm.rmrb", file[i], ", type = 'slam')")))
+eval(parse(text = paste0("out <- prepDocuments(corpus$documents, corpus$vocab, meta", file[i], ")")))
+
+
+wordcounts <- unlist(lapply(out$documents, function(x) sum(x[2,])))
+## there are fractional wordcounts due to variational approximation.
+round(mod.out$theta[,1] * wordcounts,2)
+
+## Calculate the proportion of words devoted to topics
+topicPropsInCorpus <- rep(NA,15)
+for(i in 1:15){
+  topicPropsInCorpus[i] <- (sum(mod.out$theta[,i] * wordcounts))/sum(wordcounts)
+}
+## This now holds the topic proportions in the corpus
+topicPropsInCorpus
+## sums to one, as it should
+sum(topicPropsInCorpus)
+## add the topic labels
+names(topicPropsInCorpus) <- topicnames
+
+## Plot the network
+library(igraph)
+## using a non-binary distance matrix
+mat2 <- cor(mod.out$theta) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+mat2[mat2<0] <- 0
+## setting the diagonal to zero
+diag(mat2) <- 0
+## this gives us positive correlations between topics
+mat2
+## rename this object as "out"
+out <- mat2
+which(out == max(out[2,]), arr.in = T)
+corMD <- data.frame(out[2,13], )
+
+## set a seed so that it's reproducable
+set.seed(313)
+## make the graph object
+g <- graph.adjacency(out, mode="undirected", weighted=T)
+if(length(labels)==0) labels = paste("Topic", topics)
+## make the edges thickness proportional to correlation
+cor(mod.out$theta)[,1]
+E(g)
+edges <- get.edgelist(g)
+edgecors <- rep(NA,nrow(edges))
+for(i in 1:nrow(edges)){
+  edgecors[i] <- cor(mod.out$theta)[edges[i,1],edges[i,2]]
+}
+edge.width=35*edgecors
+## look at and set other graph parameters
+E(g)$weight
+E(g)$size <- 1
+E(g)$lty <- 1
+E(g)$color <- "black"
+
+#Make the colors indicate the direction of the coefficient
+## get the estimates
+est <- unlist(lapply(prep$means,function(x){return(x[1])}))
+## get colors
+mycols <- rev(colorRampPalette(c("red", "white", "blue"), bias=1)( 20 )) ## (n)
+## assign the color category for each coeff
+seq(.04,.09,length.out=21) #Change to the coefficient range
+colcat <- rep(NA,length(est))
+for(i in 1:length(colcat)){
+  colcat[i] <- max(which(est[i] > seq(.04,.09,length.out=21)))
+}
+## These are now the color category for each coefficient
+colcat
+## and these are the associated colors
+mycols[colcat]
+## This checks to make sure the colors are working as I expect
+## Blue should be on the left and red on the right.
+plot(est,1:15,pch=19,cex=2,col=mycols[colcat]);abline(v=0)
+
+## label the vertices
+V(g)$label=topicnames
+## set the size of vertices proportional to the proportion in the corpus
+V(g)$size <- topicPropsInCorpus*200
+## set the color of vertices
+vertex.color = mycols[colcat]
+## set other vertex characteristics
+vertex.label.cex = 1.5
+vertex.label.color = "black"
+## set the edge color
+edge.color = "gray60"
+## set a seet so that the layout is reproduceable
+set.seed(313)
+## pull out the weights to include in the layout
+wts <- E(g)$weight
+## make the layout
+mylayout <- layout.fruchterman.reingold(g,weight=wts)
+## start the image file
+png("./paper/figure/cor7891.png", width = 3000, height = 1273)
+## do the plot
+plot(g, layout=mylayout,edge.color=edge.color,vertex.color=vertex.color, vertex.label.cex=vertex.label.cex, vertex.label.color=vertex.label.color,edge.width=edge.width)
+## close the image file
+dev.off()
+## I then rearrange with photoshop to move the outlying vertices closer in
 
 
 
-# 2.3 9203####
+
+# 2.3 9203 ####
 # 2.3.1 Select the best model (based on the graph produced in 2.2)
 mod.out <- topicsele9203$runout[[4]]
 
@@ -354,12 +534,12 @@ labelTopics(mod.out,n=10)
 
 # Identify the topics by "Highest" and "FREX"
 
-topicnames <- c("National Stability","Market Economy","Organization and Supervision","Spiritual Civilization","Socialist Development","Daily Life","Ideology","Governing","Opening","Developing Strategy (D)","Leadership","Economic Reform","Achievements","Responsibility","Institutional COnstruction")
+topicnames <- c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","Ideo Education","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional COnstruction")
 
 
 
 
-#############################################
+##### Selection Corpus ########################################
 # Data loading
 load("H:/Documents/data/Selection corpus/dtm.sele.Rdata")
 load("E:/Dropbox_sync/Method/Data/corpus/Selection corpus/dtm.sele.Rdata")
