@@ -1,0 +1,325 @@
+\documentclass[abstracton,UTF8]{ctexart}
+%\documentclass[12pt,abstracton]{article}
+\usepackage[english]{babel}
+\usepackage[letterpaper,margin=1in,footskip=.5in]{geometry} %left=0.6in,right=0.6in,top=1in,bottom=1in 用于细致调整
+\usepackage[tbtags]{amsmath}  
+%Place equation numbers on the left by adding [leqno]; [tbtags] ‘Top-or-bottom tags’ For a split equation, place equation numbers level with the last (resp. first) line, if numbers are on the right (resp. left).
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+\usepackage{times}
+\usepackage{setspace}
+\usepackage{paralist}
+\usepackage{titling}
+\usepackage{graphicx}  %Graph
+\usepackage{amssymb}  % Math
+\usepackage{dsfont}
+\usepackage{fancyhdr} %Header set
+\usepackage{indentfirst} %indent at the first paragraph
+\usepackage[sort&compress]{natbib} %3 lines from here Bibliographic; sort & compress orders multiple citations into the sequence in which they appear in the list of references+;but in addition multiple numerical citations are compressed if possible (as 3-6, 15)
+\usepackage[utf8]{inputenc}
+\bibpunct{(}{)}{;}{a}{}{,}
+\usepackage{booktabs} %thinner lines in table
+\usepackage{dcolumn}  %aligning decimal points
+\usepackage[table]{xcolor}  %highlight parts of a table
+\usepackage[T1]{fontenc} %dealing with "<>" unable to appear problems
+\usepackage{multirow} %merge rows in table
+\usepackage[labelfont=bf]{caption}  % Border the caption includiong"Figure." and "Table."
+\usepackage{import} % to import file in subfolders, using \import{full path}{file}
+\usepackage{rotating} %rotate tables which are too wide
+\usepackage{tablefootnote} %Maintain footnotes appearing in table
+\usepackage[capposition=top, font=scriptsize]{floatrow} % adding notes for the figures
+%\usepackage{subfigure} %纵排二图
+\usepackage{subcaption}
+	\captionsetup{textfont = sl} % use slanted font shape automatically for all captions
+\usepackage{appendix} %精细化附录
+\usepackage[colorlinks,
+            linkcolor=red,
+            anchorcolor=blue,
+            citecolor=black
+            ]{hyperref}    %bookmark
+\usepackage[capitalise,noabbrev]{cleveref} %automatically detect type of reference by label, using \cref{key} instead of \ref{key}; at the begining of sentences, use \Cref{key}
+\interfootnotelinepenalty=10000 %Keep long footnote together
+\author{Yue Hu}
+
+\def\Tiny{\fontsize{5pt}{5pt} \selectfont} %choose font smaller than \tiny, the smallest size is 5pt.
+
+%Subtitle Codes
+\makeatletter
+\def\s@btitle{\relax}
+\def\subtitle#1{\gdef\s@btitle{#1}}
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+  \if\s@btitle\relax
+  \else\typeout{[subtitle]}%
+   \vskip .5pc
+   \begin{large}%
+    \textsl{\s@btitle}%
+    \par
+   \end{large}%
+  \fi
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\makeatother
+
+% This code puts the section numbering in the margins
+%\renewcommand*{\othersectionlevelsformat}[1]{%
+%	\makebox[0pt][r]{%
+%	\csname the#1\endcsname\enskip}%
+%	}
+
+\begin{document}
+	\title{The Dynamic of the Concept of Democracy in Modern China}
+	\date{\today}
+	\maketitle
+	
+	\setlength{\parindent}{2em} %段前空格
+
+This paper purposes to show the dynamic in the construction of the concept ``democracy.'' in a society without much democratic experiment. As \citet{Diamond2006} points out, the realization of democratization entails a critical condition that the social members can be accurately aware of the meaning of liberal democracy and, furthermore, criticize the non-democratic practices. However, how does this possible in societies with little democratic experience, where, in many cases, the elites, the beneficiaries of the nondemocratic regime, dominate the construction of the political knowledge of the masses? One may argue that the nowadays global share of information can reduce such elite dominance and increase the possibility of the public to receive accurate knowledge about liberal democracy. But, is there also a possibility that some dynamic in the elite-driven conceptual construction may make it finally deliver the accurate  ``democracy'' meanings to the public?  
+
+One answer to this question might be: ``no, it never happens.'' The democratic concept in nondemocratic societies always have some authoritarian color. People living in it would never receive accurate knowledge about liberal democracy unless they can connect to the outside by, for example, uncensored internet or studying abroad. Another potential answer can be ``yes, just giving sufficient time.'' When people stay in a certain level of socioeconomic environment for sufficient time (like by generations), they will pursue democracy automatically. A third possibility is the one offered by this paper that elites will deliever the correct information when they are ready.
+
+I generalize three models based on the existing literature to explain this problem: the static cultural model, the modernization model, and the elite-evaluation model. The engines of the dynamic of the democratic concept constructions are respectively culture, social economy, and political power in the three models. Then I conduct an empirical test the inferences of the three models based on the China case. In the past over six decades, China experienced dramatical changes in all aspects of cultural and ideology, social economy, and political power capacity. This provides a naturally befitting source for testing aforementioned three models. In this study, I collect over a million articles of about 60 years (1946-2003) in the official newspapers of Chinese Communist Party (CCP). This big data enables me to analyze how the concept of democracy was shaped and presented by top elites in Chinese politics in periods with different cultural environment, socioeconomic development, and political capacities of the incumbent government. Particularly, I identify how the voice of the authority present democratic topics in different periods and what relationship they had with other topics. I found that the concept of democracy in modern China necessarily related to neither the ideology nor the development. Instead, it has a high association with the capacity of the authority---what it was good at at that moment. This evidence supports the elite-evaluation model the most. It also suggest that the most likely moment the liberal democratic concept is top-down delivered is when the authority ensured it can hold the power in the democratic regime. 
+
+In the following sections, I review the existing literature of the conceptual changes in democratic concept in non-democratic countries. Based on three main theories of it, I generalize three models to explain the dynamic. Then I discuss the case selection, data collection, and how to use the structural topic models (STM) to test the theoretical inferences. Finally, I discuss how this study can be helpful to understand and anticipate the political transitions in modern China.
+	
+\section{How Can the Concept of Democracy Change?}
+
+To date, there has been a well developed literature of the concept of democracy, producing hundreds of definitions and standards that scholars used to understand democracy \citep[see, for example, ][]{Sen1999,Dahl1989,Schumpeter1947,Pateman1970,Karl1991a,Munck2014,Przeworski2000}. Nevertheless, most of them were developed based on the theories of liberal democracy and practices in western worlds. Nevertheless, Shi Tianjian and his colleagues made an important contribution to this literature by pointing out that the concept of democracy also relies on social context; the same concept can mean very different things, for example, in the U.S. and China \citep{Lu2014a,Shi2014}. This finding, on the one hand, troubles the survey researchers especially. It suggests that, before drawing any conclusions from cross-national survey data about democracy, the researchers have to first ensure that the survey measured the same values or attitudes. On the other hand, the finding also provides a new angle to understand democratizations in non-democratic societies: (liberal) democratization may be an institutional transition followed by some type of value changes.
+
+Actually, since the profound argument by \citet{Weber1958} and the benchmark work of \citet{Almond1989}, scholars have been aware of the critical role of democratic value to the democratic transition and the stability of democratic regime. Many of them believe that a degree of recognition of democratic spirit and values in social members is an inevitable condition for a successful democratic transition and maintenance. Also, in different regions, peoples' awareness and beliefs of democratic values are in different degrees\citep[see, for example, ][]{1984,Putnam1994,PYE2006,Pye1992,Inglehart2005,Fuchs2007}. What Shi Tianjian and his colleagues demonstrates is that those difference in degrees can actually be difference in essence. The observed disparity on civil cultural across countries may not because the people there have not believe enough, but because they believe in different concepts---even if they already approve the legitimacy of democracy as those people in liberal democratic regimes do. Then, is there a possibility that a society can turn to liberal democracy concept from alternative concepts? This is a question to be asked especially when assuming liberal democracy is the only sufficient way to maximize the human development \citep{Dahl1989} and ought to be ultimate terminal of any democratic transitions \citep{Fukuyama2006}.
+
+For many culturalists, including Shi Tianjian and his colleagues, this seems not a question their theories care about. In these culturalist theories, the disparity on the understanding of democracy relates to certain cultural characteristics of a certain society. This is a type of characteristics rooting in the history, but still salient and observable in the contemporary politics. For instance, in \citet{Lu2014a}, they argue that the democratic concept in some modern societies without much democratic experience is not distinctive for some aspects of democratic concept is especially emphasized. Instead, it results from a contests of the institutional setting between the current regime and the liberal democratic regime. The winning of the current regime highly relates to the cultural features of the society.\footnote{In their case, the features are the Confucian tradition and the socialist tradition of the Chinese society.} Although such theories usually do not directly discuss the concept transition issue, they seems suggesting that, since the source causing the disparity has already existed through the entire history of the society, the disparity in understanding democracy of them is highly likely to stay long.
+
+A potential limit of the culturalist theory is that they cannot explain what happened in those societies successfully transforming from a non-democratic society to a liberal democratic one, such as India, Taiwan, and perhaps Singapore. An alternative theory by the modernizers provides an explanation of these transformed and transforming cases. For traditional modernizers, although they agree that liberal democracy is the political pattern maximizing the human development, not every stage of a society can afford that. But once the social economy reach a certain level, liberal democratic values will be widely accepted and the democratic regime will become the pursuit of the entire society \citep{Lipset1960,Przeworski2000}. As neo-modernizers or post-modernizers, Inglehart and his colleagues accept some culturalist theories and modify the aforementioned modernization theory to a more complicated model \citep{Inglehart1997,Inglehart2005,Norris2011a}. They argue that there is a delay between socioeconomic development and democratization, because it takes time for social members to be used to the new socioeconomic level. From there they start to think about what they further want. Then, a expression-based liberal democratic pursuit is naturally accepted by the majority of the society. 
+
+However, the modernizers and post-modernizers face a limit for their theory, which is opposite to the culturalists. That is, they cannot explain why some societies, such as China and perhaps also Singapore, still not accomplish or even start shifts towards liberal democracy even if the social members have experience the continuous socioeconomic development for a certain time. An ambiguous answer to this from the modernizers is usually be that the time is not long enough \citep{Inglehart2005}. This is obvious not a well-developed response and puts the theory under the risk of being unfalsifiable. In the following section, I develop an elite-evaluation theory as an alternative. The theory is more favorable than the above two existing theories by involving consistent explanations to their abnormalities.
+
+\section{The Dynamic of the China-Style Democracy}\label{s:theory}
+The elite-evaluation theory follows a very simple rational choice logic that only when the political elites, especially the decision makers, in the incumbent government believe they can at least hold the ruling power under the liberal democratic regime can they deliver the liberal democratic concept to their agents and the masses. In a more general statement, \textit{the connotation of democracy in a society at a certain time period relies on what the incumbent is good at}. 
+
+This theory needs three assumptions. First, the political elites matters. In this study, I define the political elites as the main decision makers who play the determinative roles in the primary political processes of a country and also the one who earn the most benefits by holding the ruling power \citep{BuenodeM2003}. By this definition, the first assumption is self-evident. 
+
+Second, the political elites believe the democratic concept matters to his authority. This is largely an contextual statement especially for the countries raised after the World War II. \citet{Schedler2013} argues that the single-party regime already lost the legitimacy after the Cold War. Scholars like \citet{Fukuyama2006} and \citet{Huntington1993} also provide theoretical and empirical evidence that the trend of democratization already started in the $19^{th}$ century. In this context, as the ruling power of a modern country, the rulers have to somewhat justify their ruling ways follows this trend of improving the human development. 
+
+The third assumption is that political elites has the ability to shape the opinions of their agents and the public. There is a large literature discussing the framing capacity of authoritarian leaders on the public opinions and attitudes \citep{Miller1979,Patterson1999,Chan1997,Jiang2015}. This is actually also the case in democratic countries \citep{Sniderman2004,Chong2007}. What the existing literature rarely discussed is that such influential power should include an at least two-step mechanism. To simplify the argument, let's assume individuals of the masses as homogeneous units who accept certain opinion by repeatedly indoctrination and witness some evidence. In this case, to convince the masses of a concept of democracy needs at least, first, presenting the same concept in various patterns and repeatedly, and, second, let the agents to understand and follow the concept in order to practice in their interactions with the masses. In this mechanism, the second step is equally important but often ignored. In the later empirical analysis, I will focus on this step particularly.
+
+Based on the above assumptions, to keep in power, the political elites needs to justify the legitimacy of their power. In the context of modern politics, this means the ways needs to compatible to democracy. On the other hand, the elites would not change their current ruling way because this is the way benefit them the most. Also, the political elites will apply the ruling way they can do the best with their political capacity to maximize their benefits. To achieve both above two points, the most effective way is to define democracy with the applied governing way and deliver it to the agents and, furthermore, the masses. If regarding the presentation of the concept of democracy as a topic in the delivered information from the political elites, two inferences can be drawn:
+
+$H_1$: The topics of democracy are different across the periods if the governing way changes.
+
+$H_2$: The topics of democracy associates the most with the governing ways the incumbent adopted at the period.
+
+To examine these hypotheses, I develop a empirical test based on the STM method to analyze text data collected from China. In the following section, I will discuss why I use the Chinese case and the design of the empirical test.
+
+\section{Data and Method}
+As discussed in the \cref{s:theory}, this study mainly focuses on the the first stage of the conceptualized process of democracy in modern China: the construction of the connotation of democracy. Particularly, I pay attention to what kind of democratic concepts CCP indoctrinates to the officials, the managers and implementers of CCP's strategies, policies, and ideologies. To test this, I choose data from two most authoritarian and extensively influential sources: \textit{People's Daily} and the \textit{Selections} of three generations of CCP General Secretaries. 
+
+\textit{People's Daily} is the central committee official paper of CCP \citep{People}, which is required booking in every governmental and party departments. The main readers of it are the officials in these sections. In other words, the newspaper presents the viewpoints the CCP leadership wants its cadres and staffs to believe and follow. In this case, it is one of the most important source to understand Chinese political ideology and theories. Unfortunately, it has not been attract adequate attention from political scientists of China study. So far, there are very few serious academic studies on \textit{People's Daily}, except for a couple of descriptive analyses from the communication and advertisement perspectives \citep{Chute1995,Swanson1996}. The most recent political scientific studies I can find was a ``research note'' published in last century \citep{Wu1994}. On the other hand, most analyses in political science on Chinese newspaper pay most attention to the provincial and city level semi-commercial newspapers \citep{Shirk2010,Reich2014}. 
+
+In this study, I draw attention to this important source, and show a way to make empirical inferences based on it. I collected the articles published in People's Daily from 1946 to 2003 (over one million articles). The wide time span and large data pool allows me to analyze the construction of CCP on the concept of democracy in five time periods during three generations of CCP leaderships in the modern China, the ``pre-liberation'' period (the time before the founding of People's Republic of China, 1946-1949), the ``early-liberation'' period (1950-1965), and the ``Cultural Revolution'' period (1966-1977) of \textit{Mao's time}, the ``thought emancipation'' period (the period from the ``reform and open'' policy was promulgated till the June-$ 4^{th} $(Tian'anmen Square) event, 1978-1989) of \textit{Deng's time}, and the post-June-$ 4^{th} $ period of \textit{post-Deng time}. Each of the five periods of three times were distinctive for modern China, in terms of both national developing status and strategies. If the dynamic inferred from the alternative hypotheses exists, there should be different characteristics in the concept of democracy between these periods.
+
+I also prepare a secondary data source, which expends the observation scale by 2 decades, for robustness check. That is the \textit{Selections} of the General Secretaries of the three generations of CCP leadership. The \textit{Selections of Mao Zedong} collects various articles of him published from 1925 to 1957; the \textit{Selections of Deng Xiaoping} collects his works from 1938 to 1992; and \textit{Selections of Jiang Zemin} collects his work from 1980 to 2004. These \textit{Selections} include important articles, reports, and speeches of the heads of the three leaderships. This is an important data about political ideology and thoughts of modern China, which have not been systematically analyzed yet. In an authoritarian country like China, the leaders' expressions were not only about their own political opinions, but also set the main themes of policies and ideology of the then time. In this case, it serves as a good resource for robustness check. If the dynamic in the concept of democracy exists, it should appear at both the strategic level, e.g., these \textit{Selections}, and the indoctrination level, e.g., \textit{People's Daily}, and be coherent temporarily.
+
+
+Two types of approach are available to detect the underlying topic dynamics in texts, human coding and computer-assisted automated analysis \citep{Lucas2015,Blei2012,Roberts2014}. The latter method is preferred in this study because of three reasons. Most importantly, the automated method based on probability topic models allows me to discover topics in the corpus\footnote{A term in linguistics and digital humanity for text datasets \citep{Jockers2013}} rather than assuming them and do hypothesis tests about the correlations between topics \citep{Roberts2013}. Moreover, the methods allow me to analyze the changes of the prevalence (topic frequencies used within a corpus, e.g., the topic of democracy was more mentioned in the thought emancipation period than in Cultural Revolution period) and content (word frequencies used for each topic, e.g., the topic of democracy were more likely to use certain words in the thought emancipation period than in the post-Deng period.) of topics, which are two crucial perspectives of dynamics in concepts \citep{Lucas2015}. Finally, because the study pays more attention to what the texts deliver rather than how they present it, the grammar and syntax, which the automated analysis is usually helpless with, no longer matters. Instead, the superior advantage of it on the coding and selection preciseness than human codes become more important, especially to deal with such large corpora including over a million articles.
+
+Within the automated analytical methods, I choose the structural topic model (STM) to do most analyses in this study. The basic logic is formed in three steps as below, following the notation of \cite{Roberts2014a}. First, a logistic-normal general linear model ($\vec{\theta}_d$) is used to give a baseline distribution to the topic prevalent, which is allowed to vary based on the document covariates $X_d$ (the meta-data of the document, such as time, authorship, and language):
+\begin{equation*}
+\vec{\theta}_d | X_d\gamma, \Sigma \sim LogisticNormal(\mu =  X_d\gamma, \Sigma). 
+\end{equation*} Then, for each word in each of the $d$ documents ($n \in [1, N_d]$), the distribution of the topic it assigned on conditioned by the distribution of the topic prevalent is assumed following a multinomial distribution: 
+\begin{equation*}
+z_{d,n} | \vec{\theta}_d \sim Multinomial(\vec{\theta}).
+\end{equation*}
+Finally, the observed words is also given a multinomial distribution conditioned by the topic chosen: 
+\begin{equation*}
+w_{d,n} | z_{d,n}, \beta_{d,k = z} \sim Multinomial(\beta_{d,k = z}), 
+\end{equation*} where the topic distribution over words ($\beta_{d,k}$) is a combination of three components, a given baseline word distribution($ m $), the topic specific deviation ($\kappa_k$), the covariate group deviation ($\kappa_g$), and the topic-covariate interaction $\kappa_{i = kg_d}$ with a multinomial logit:
+\begin{equation*}
+\beta_{d,k} \varpropto exp(m + \kappa_k + \kappa_g + \kappa_{i = kg_d}). 
+\end{equation*} Further details about the above process can be seen in \citep{Lucas2015,Roberts2014,Roberts2013}. 
+
+The STM has all the qualities of the regular latent Dirichlet allocation model and correlated topic model; one feature making STM superior to these models is that it allows incorporating meta-data associated with the documents into document-level covariates \citep{Lucas2015}. This feature is useful not only for studies which focus on the conditional effect of meta-data, but also for ruling out systematic differences within the corpus that are not of primary interest \citep[10]{Lucas2015}. In this study, it will be used to estimate the topics and, particularly, the correlations within them in the corpora (\textit{People's Daily} and the \textit{Selections}). If the topic of democracy does not always correlate with guardianship related topics but to various other topics across different time periods, then I have the evidence to reject the hypothesis that guardianship is always a theme of China-style democracy. If the topics highly related to democracy correspond to not only the socioeconomic development but also the then characteristics of China's most popular aspects (such as national self-determination or revolution), then I have the evidence to support the theoretical argument that the guardianship may not be a static part of China-style democracy but only represent a temporal characteristic in the process of democratization towards liberal democracy. Moreover, the model will also contribute to condition away the within-period variance in each time span.
+
+
+
+
+
+\section{Different Period, Different Democracy: An Empirical Analysis}
+
+\section{Conclusion}
+
+
+\bibliographystyle{ajps}
+\bibliography{E:/Dropbox_sync/Dropbox/Jabref}
+
+\clearpage
+\appendix
+\appendixpage
+\addappheadtotoc
+
+\import{table/}{description.tex}
+\import{table/}{description.sele.tex}
+\import{table/}{topic.eg.tex}
+\import{table/}{topic.list.tex}
+\import{table/}{topic.sele.tex}
+\import{table/}{corDM.tex}
+
+\begin{figure}[htbp]
+	\begin{subfigure}{0.6\textwidth}
+		\includegraphics[width=\textwidth]{figure/demodestriI.png}
+		\caption{How Often ``Democracy'' Was Mentioned.}
+		\label{f:descDemI}
+	\end{subfigure}
+	\begin{subfigure}{0.6\textwidth}
+		\includegraphics[width=\textwidth]{figure/demodestriII.png}
+		\caption{How Often ``Democra-'' Words Were Mentioned.}
+		\label{f:descDemII}
+	\end{subfigure}
+	\caption{``Democracy'' and Relevant Concepts in \textit{People's Daily}}
+	\label{f:descDem}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloud4649.png}
+		\caption{Pre-Liberation}
+		\label{f:cloud46}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloud5065.png}
+		\caption{PRC Founding}
+		\label{f:cloud50}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloud6677.png}
+		\caption{Cultural Revolution}
+		\label{f:cloud66}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloud7891.png}
+		\caption{Pre-Tian'anmen}
+		\label{f:cloud78}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloud9203.png}
+		\caption{Post-Tian'anmen}
+		\label{f:cloud92}
+	\end{subfigure}
+	\caption{Word Clouds of \textit{People's Daily} in Four Periods}
+	\label{f:cloudrmrb}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{figure/msele4649.png}
+		\caption{Pre-Liberation}
+		\label{f:msele46}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{figure/msele5065.png}
+		\caption{PRC Founding}
+		\label{f:msele50}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{figure/msele6677.png}
+		\caption{Cultural Revolution}
+		\label{f:msele66}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{figure/msele7891.png}
+		\caption{Pre-Tian'anmen}
+		\label{f:msele78}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{figure/msele9203.png}
+		\caption{Post-Tian'anmen}
+		\label{f:msele92}
+	\end{subfigure}
+	\caption{STM Model Selections}
+	\label{f:mselermrb}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloudmao.png}
+		\caption{\textit{Selections of Mao}}
+		\label{f:cloudmao}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/clouddeng.png}
+		\caption{\textit{Selections of Deng}}
+		\label{f:clouddeng}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/cloudjiang.png}
+		\caption{\textit{Selections of Jiang}}
+		\label{f:cloudjiang}
+	\end{subfigure}
+	\caption{Word Clouds of \textit{Selections}}
+	\label{f:cloudsele}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\caption{They Dynamics in the Construction of ``Democracy''}\label{f:cordyn}
+	\includegraphics[width=.8\textwidth]{figure/cordyn.png}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth, height = .3\textheight]{figure/ldamao.png}
+		\caption{\textit{Selections of Mao}}
+		\label{f:ldamao}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth, height = .3\textheight]{figure/ldadeng.png}
+		\caption{\textit{Selections of Deng}}
+		\label{f:laddeng}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth, height = .3\textheight]{figure/ldajiang.png}
+		\caption{\textit{Selections of Jiang}}
+		\label{f:ldajiang}
+	\end{subfigure}
+	\caption{Topic Correlations of \textit{Selections}}
+	\label{f:lda.sele}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/perplexitymao.png}
+		\caption{\textit{Selections of Mao}}
+		\label{f:perplexitymao}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/perplexitydeng.png}
+		\caption{\textit{Selections of Deng}}
+		\label{f:perplexitydeng}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\includegraphics[width=\textwidth]{figure/perplexityjiang.png}
+		\caption{\textit{Selections of Jiang}}
+		\label{f:perplexityjiang}
+	\end{subfigure}
+	\caption{Topic Number Selections in the Topic Models of \textit{Selections}}
+	\label{f:perplexity.sele}
+\end{figure}
+
+\end{document}
