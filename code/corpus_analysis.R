@@ -197,8 +197,8 @@ for (i in 1:length(file)) {
 topicnames.full <- data.frame(c("Production","United Front","Disciplines","Eco-Org","Logistics","Worker Org","Inside Democracy (D)","Governance","Ideology","White Area","Civil War","Taking Over","Instit Construction","Class Division(M)","City Build"),
                               c("State Construction (D)","United Front","Worker Org","Revol Strategy (M)","Culture Construction","Instit Construction", "War Remnants","Production","Foreign Affairs","Planned Economy","Agriculture Tech","Ideology","Cold War","Production","Foreign News"),
                               c("Political Struggle","Thought Remoulding","Cold War","Agr Development","Mao Worship","Class Struggle","Social Movement","Agr Production","Foreign Coorperation","Mass Line (M)","Cultural Revolution","Enemy","Daily Work","Proletarian Dictatorship","International Communism (D)"),
-                              c("National Strategy","Collective Ownship (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front"),
-                              c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","China Style Development","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Institutional Construction")
+                              c("National Strategy","Collective Ownership (D)","Reform and Opening","Organization","Market Economy","National Policy","Culture Construction","Redressment","Education","Daily Life","Party Leading","Foreign Affairs","Ideology (M)","Trade","United Front"),
+                              c("National Strategy","Market Economy","Org and Supervision","Culture Construction","Ideology","Daily Life","China Style Development","Governing","Opening-up","Development Policy (D)","Leadership","Economic Reform","Achievements","Gov Responsibility (M)","Instit Construction")
                               )
 colnames(topicnames.full) <- c("Pre-Liberation", "PRC Founding", "Cultural Revolution","Pre-Tian'anmen", "Post-Tian'anmen")
 
@@ -906,7 +906,6 @@ ggplot(data = cor.graph, aes(x = Period, y = Correlation, color = Period.1, ymax
   geom_point(position=pd, size = 3) + 
   scale_x_discrete(limits=c("Pre-Liberation", "PRC Founding", "Cultural Revolution", "Pre-Tian'anmen", "Post-Tian'anmen")) + 
   scale_colour_hue(name="Category",  l=40)  +
-  ggtitle("Average bill for 2 people") +     # Set title
   theme_bw() + 
   theme(legend.position=c(.85, .25))  
 
@@ -993,7 +992,7 @@ jss_TM2 <- list(
 
 #save(jss_TM2, file = "./code/jss_TM2.Rdata")
 
-termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
+termsForSave<- terms(jss_TM2[["Gibbs"]], 30)
 
 write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.mao.csv", fileEncoding = "UTF-8")
 # Topic 1, 6, 7 has democracy
@@ -1094,7 +1093,7 @@ jss_TM2 <- list(
 
 #save(jss_TM2, file = "./code/jss_TM2.Rdata")
 
-termsForSave<- terms(jss_TM2[["Gibbs"]], 20)
+termsForSave<- terms(jss_TM2[["Gibbs"]], 30)
 
 write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.deng.csv", fileEncoding = "UTF-8")
 # Topic 5 has democracy
@@ -1207,13 +1206,31 @@ jss_TM2 <- list(
   
 #save(jss_TM2, file = "./code/jss_TM2.Rdata")
 
-termsForSave<- terms(jss_TM2[["Gibbs"]], 10)
+termsForSave<- terms(jss_TM2[["Gibbs"]], 30)
 
 
 write.csv(as.data.frame(t(termsForSave)), "./paper/table/gibs.jiang.csv", fileEncoding = "UTF-8")
 # Topic 5 has democracy
 
-#'topic graphs'
+########Tried to Create Correlation Forms, but it turns out the Demo topic has no relations to any one. Therefore give it up.################
+#library(igraph)
+## using a non-binary distance matrix
+#mat2 <- cor(t(jss_TM2$Gibbs@beta)) 
+#correlation of (Number of Documents by Number of Topics matrix of topic proportions).
+## setting the negatives to zero
+#mat2[mat2<0] <- 0
+## setting the diagonal to zero
+#diag(mat2) <- 0
+## this gives us positive correlations between topics
+#mat2
+## rename this object as "out"
+#out <- mat2
+#maxtopic <- topicnames[which(out == max(out[2,]), arr.in = T)[1]]
+#corMD <- data.frame(out[2,13], max(out[2,]))
+
+
+
+##'topic graphs'#####
 
 tfs = as.data.frame(termsForSave, stringsAsFactors = F);tfs[,1]
 adjacent_list = lapply(1:10, function(i) embed(tfs[,i], 2)[, 2:1]) 
